@@ -15,7 +15,7 @@ public class F0FLexer
     private int current = 0;
     private int line = 1;
     private int column = 0;
-    private int tok_length=0;
+    private int tok_length = 0;
 
     private static final Map<String, TokenType> keywords;
 
@@ -130,11 +130,10 @@ public class F0FLexer
                         addToken(TokenType.slash);
                         column++;
                     } break;
-            case ' ':
-            case '\r':
-            case '\t':// Ignore whitespace. 
-                    column++;
-                    break;
+                    // Ignore whitespace. 
+            case ' ' : column++; break;
+            case '\r': column++; break;
+            case '\t': column++; break;                  
             case '\n': line++; column = 0; tok_length = 0; break;
             //default:  Lox.error(line, "Unexpected character."); break;
         }
