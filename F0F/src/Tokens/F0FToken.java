@@ -33,14 +33,15 @@ public class F0FToken
         //comparisson
         equal, equal_equal, excl, excl_equal,
         greater, greater_equal, less, less_equal,
-        //no se si tener en cuenta los comentarios, ya que son combinaciones de tokens
-    
+        
         //literals
-        INT, FLOAT, DOUBLE, VOID, BOOL, STRING, /*MFUN, POINT, DERIV, */
+        INT, FLOAT, DOUBLE, VOID, BOOL, STRING, MFUN, POINT ,/* DERIV, */
         // Floor, Ceil, Round, Random
     
         //keywords
         True, False, Null, And, Or, Def, Return, While, For, If, Else, Print,
+
+        Identifier, Integer, Decimal,
     
         EOF
     }

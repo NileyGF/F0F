@@ -37,6 +37,14 @@ public class F0FLexer
         keywords.put("true",   TokenType.True);
         /*keywords.put("var",    VAR);*/
         keywords.put("while",  TokenType.While);
+        keywords.put("mfun",   TokenType.MFUN);
+        keywords.put("Point",  TokenType.POINT);
+        keywords.put("void",   TokenType.VOID);
+        keywords.put("bool",   TokenType.BOOL);
+        keywords.put("string", TokenType.STRING);
+        keywords.put("int", TokenType.INT);
+        keywords.put("float", TokenType.FLOAT);
+        keywords.put("double", TokenType.DOUBLE);
     }
     
     F0FLexer(String source) 
@@ -131,20 +139,28 @@ public class F0FLexer
                         column++;
                     } break;
                     // Ignore whitespace. 
-            case ' ' : column++; break;
-            case '\r': column++; break;
-            case '\t': column++; break;                  
+            case ' ' : column++; tok_length = 0; break;
+            case '\r': column++; tok_length = 0; break;
+            case '\t': column++; tok_length = 0; break;                  
             case '\n': line++; column = 0; tok_length = 0; break;
-            //default:  Lox.error(line, "Unexpected character."); break;
+            case '"' : string(); break;
+            default:
+                    if (Digit(c)) {
+                        number();
+                    } else if (Alpha(c)) {
+                        identifier();
+                    } 
+                    else {} //Lox.error(line, "Unexpected character."); 
+                    break;
         }
     }
     private char advance() {
         current++;
         return source_code.charAt(current - 1);
     }
-    private void addToken(TokenType type/*, Object literal = Null*/) {
+    private void addToken(TokenType type, Object ...literal) {
         String text = source_code.substring(start, current);
-        tokens.add(new F0FToken(type, text, null, line, column, tok_length));
+        tokens.add(new F0FToken(type, text, literal, line, column, tok_length));
     }
     private boolean match_next(char expected) 
     {
@@ -161,4 +177,91 @@ public class F0FLexer
         if (current + 1 >= source_code.length()) return '\0';
         return source_code.charAt(current + 1);
     } */
+    private void string() {
+        while (peek() != '"' && !end_file()) {
+            if (peek() == '\n') {
+                line++;
+                column = 0;
+            }
+            column++;
+            tok_length++;
+            advance();
+        }
+
+        // Unterminated string.
+        if (end_file()) {
+            //Lox.error(line, "Unterminated string.");
+            return;
+        }
+
+        // The closing ".
+        advance();
+
+        // Trim the surrounding quotes.
+        String value = source_code.substring(start + 1, current - 1);
+        addToken(TokenType.STRING, value);
+    }
+    private boolean Digit(char c)
+    {
+        return c >= '0' && c <= '9';
+    }
+    private boolean Alpha(char c)
+    {
+        boolean lower_case = (c >= 'a' && c <= 'z');
+        boolean capital = (c >= 'A' && c <= 'Z');
+        return lower_case || capital || c == '_';
+    }
+    private void number()
+    {
+        boolean decimal = false;
+        while (Digit(peek())) 
+            {
+                column ++; tok_length ++;
+                advance();
+            }
+        // Look for a fractional part.
+        if (peek() == '.') 
+        {
+            if (current + 1 < source_code.length()) 
+            {
+                char peeknext = source_code.charAt(current + 1);
+                if(Digit(peeknext))
+                {    // Consume the "."
+                    advance();
+                    decimal = true;
+                    tok_length++;
+                }
+                column ++;
+            }
+            while (Digit(peek())) 
+            {
+                column ++; tok_length ++;
+                advance();
+            }
+        }
+
+        if(decimal)
+        {
+            addToken(TokenType.Decimal, Double.parseDouble(source_code.substring(start, current)));
+        } 
+        else
+        {
+            addToken(TokenType.Integer, Integer.parseInt(source_code.substring(start, current)));
+        }
+        
+    }
+    private void identifier()
+    {
+        while (Alpha(peek()) || Digit(peek())) {
+            column ++; tok_length++;
+            advance();
+        }
+
+        // See if the identifier is a reserved word.
+        String text = source_code.substring(start, current);
+
+        TokenType type = keywords.get(text);
+        if (type == null) type = TokenType.Identifier;
+        addToken(type, text);
+    }
 }
