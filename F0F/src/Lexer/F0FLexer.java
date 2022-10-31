@@ -14,7 +14,7 @@ public class F0FLexer
     private int start = 0;
     private int current = 0;
     private int line = 1;
-    private int column = 0;
+    private int column = 1;
     private int tok_length = 0;
 
     private static final Map<String, TokenType> keywords;
@@ -47,20 +47,21 @@ public class F0FLexer
         keywords.put("double", TokenType.DOUBLE);
     }
     
-    F0FLexer(String source) 
+    public F0FLexer(String source) 
     {
         this.source_code = source;
     }
-    List<F0FToken> scanTokens() 
+    public List<F0FToken> scanTokens() 
     {
         while (!end_file()) {
             // We are at the beginning of the next lexeme.
             start = current;
             tok_length = 0;
+            //column ++;
             scanToken();
         }
 
-        tokens.add(new F0FToken(TokenType.EOF, "", null, line, 0 ,0));
+        tokens.add(new F0FToken(TokenType.EOF, "", null, line, column ,tok_length));
         return tokens;
     }
     private boolean end_file() 
@@ -71,18 +72,18 @@ public class F0FLexer
     {
         char c = advance();
         switch (c) {
-            case '(': tok_length++; addToken(TokenType.opar); column++; break;
-            case ')': tok_length++; addToken(TokenType.cpar); column++; break;
-            case '{': tok_length++; addToken(TokenType.obrace); column++; break;
-            case '}': tok_length++; addToken(TokenType.cbrace); column++; break;
-            case '[': tok_length++; addToken(TokenType.obracket); column++; break;
-            case ']': tok_length++; addToken(TokenType.cbracket); column++; break;
-            case ',': tok_length++; addToken(TokenType.comma); column++; break;
-            case '.': tok_length++; addToken(TokenType.dot); column++; break;
-            case '-': tok_length++; addToken(TokenType.minus); column++; break;
-            case '+': tok_length++; addToken(TokenType.plus); column++; break;
-            case ';': tok_length++; addToken(TokenType.semicolon); column++; break;
-            case '*': tok_length++; addToken(TokenType.star); column++; break;
+            case '(': tok_length++; column++; addToken(TokenType.opar);      break;
+            case ')': tok_length++; column++; addToken(TokenType.cpar);      break;
+            case '{': tok_length++; column++; addToken(TokenType.obrace);    break;
+            case '}': tok_length++; column++; addToken(TokenType.cbrace);    break;
+            case '[': tok_length++; column++; addToken(TokenType.obracket);  break;
+            case ']': tok_length++; column++; addToken(TokenType.cbracket);  break;
+            case ',': tok_length++; column++; addToken(TokenType.comma);     break;
+            case '.': tok_length++; column++; addToken(TokenType.dot);       break;
+            case '-': tok_length++; column++; addToken(TokenType.minus);     break;
+            case '+': tok_length++; column++; addToken(TokenType.plus);      break;
+            case ';': tok_length++; column++; addToken(TokenType.semicolon); break;
+            case '*': tok_length++; column++; addToken(TokenType.star);      break;
             case '!': 
                     if(match_next('=')) {
                         tok_length+=2; 
@@ -146,8 +147,10 @@ public class F0FLexer
             case '"' : string(); break;
             default:
                     if (Digit(c)) {
+                        tok_length++; column ++;
                         number();
                     } else if (Alpha(c)) {
+                        tok_length++; column ++;
                         identifier();
                     } 
                     else {} //Lox.error(line, "Unexpected character."); 
@@ -160,7 +163,7 @@ public class F0FLexer
     }
     private void addToken(TokenType type, Object ...literal) {
         String text = source_code.substring(start, current);
-        tokens.add(new F0FToken(type, text, literal, line, column, tok_length));
+        tokens.add(new F0FToken(type, text, literal, line, column - tok_length, tok_length));
     }
     private boolean match_next(char expected) 
     {
@@ -216,8 +219,8 @@ public class F0FLexer
         boolean decimal = false;
         while (Digit(peek())) 
             {
-                column ++; tok_length ++;
                 advance();
+                column ++; tok_length++;
             }
         // Look for a fractional part.
         if (peek() == '.') 
@@ -235,8 +238,8 @@ public class F0FLexer
             }
             while (Digit(peek())) 
             {
-                column ++; tok_length ++;
                 advance();
+                column ++; tok_length++;
             }
         }
 

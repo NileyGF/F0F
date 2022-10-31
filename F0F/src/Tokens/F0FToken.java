@@ -20,7 +20,7 @@ public class F0FToken
 
     public String getLexeme(){ return lex; }
     public String toString() {
-        return type + " " + lex + " " + literal;
+        return type + " " + lex + " line: " + line + " column : " + column + " length: " + length; 
     }
 
 
