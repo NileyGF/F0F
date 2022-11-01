@@ -57,7 +57,6 @@ public class F0FLexer
             // We are at the beginning of the next lexeme.
             start = current;
             tok_length = 0;
-            //column ++;
             scanToken();
         }
 
@@ -86,58 +85,49 @@ public class F0FLexer
             case '*': tok_length++; column++; addToken(TokenType.star);      break;
             case '!': 
                     if(match_next('=')) {
-                        tok_length+=2; 
+                        tok_length+=2; column +=2;
                         addToken(TokenType.excl_equal);
-                        column +=2;
                     }
                     else{
-                        tok_length++; 
+                        tok_length++; column++;
                         addToken(TokenType.excl);
-                        column++;
                     } break;
             case '=': 
                     if(match_next('=')) {
-                        tok_length+=2; 
+                        tok_length+=2; column +=2;
                         addToken(TokenType.equal_equal);
-                        column +=2;
                     }
                     else{
-                        tok_length++; 
-                        addToken(TokenType.equal);
-                        column++;
+                        tok_length++; column++;
+                        addToken(TokenType.equal);                        
                     } break;
             case '<': 
                     if(match_next('=')) {
-                        tok_length+=2; 
+                        tok_length+=2; column +=2;
                         addToken(TokenType.less_equal);
-                        column +=2;
                     }
                     else{
-                        tok_length++; 
+                        tok_length++; column++;
                         addToken(TokenType.less);
-                        column++;
                     } break;
             case '>': 
                     if(match_next('=')) {
-                        tok_length+=2; 
+                        tok_length+=2; column +=2;
                         addToken(TokenType.greater_equal);
-                        column +=2;
                     }
                     else{
-                        tok_length++; 
+                        tok_length++; column++;
                         addToken(TokenType.greater);
-                        column++;
                     } break;
             case '/':
                     if (match_next('/')) {
                     // A comment goes until the end of the line.
                         while (peek() != '\n' && !end_file()) 
-                            {advance(); column++;}
+                            {column++; advance(); }
                     } 
                     else {
-                        tok_length++;
+                        tok_length++; column++;
                         addToken(TokenType.slash);
-                        column++;
                     } break;
                     // Ignore whitespace. 
             case ' ' : column++; tok_length = 0; break;

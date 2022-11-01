@@ -1,13 +1,13 @@
-import java.io.BufferedReader;
+//import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+//import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
 import Lexer.*;
-import Parser.*;
+//import Parser.*;
 import Tokens.*;
 
 public class F0F {
@@ -37,22 +37,7 @@ public class F0F {
         if (hadError) System.exit(65);
         if (hadRuntimeError) System.exit(70);
     }
-
-    private static void runPrompt() throws IOException {
-        InputStreamReader input = new InputStreamReader(System.in);
-        BufferedReader reader = new BufferedReader(input);
-
-        for (;;) {
-            System.out.print("> ");
-            String line = reader.readLine();
-            if (line == null) break;
-            run(line);
-            hadError = false;
-        }
-    }
     private static void run(String source) {
-        //source = "// First F0F programm \n\tprint(\"Hello World!\");";
-
         F0FLexer lexer = new F0FLexer(source);
         List<F0FToken> tokens = lexer.scanTokens();
         // Parser parser = new Parser(tokens);
