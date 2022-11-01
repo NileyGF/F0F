@@ -1,0 +1,12 @@
+// First F0F programm
+
+print("Hello World!");
+
+int x = 56;
+
+int y = x + 5.7;
+
+void LOL(bool f, char c){
+	while(false){}
+	return;
+}

@@ -143,7 +143,7 @@ public class F0FLexer
             case ' ' : column++; tok_length = 0; break;
             case '\r': column++; tok_length = 0; break;
             case '\t': column++; tok_length = 0; break;                  
-            case '\n': line++; column = 0; tok_length = 0; break;
+            case '\n': line++; column = 1; tok_length = 0; break;
             case '"' : string(); break;
             default:
                     if (Digit(c)) {
@@ -184,7 +184,7 @@ public class F0FLexer
         while (peek() != '"' && !end_file()) {
             if (peek() == '\n') {
                 line++;
-                column = 0;
+                column = 1;
             }
             column++;
             tok_length++;

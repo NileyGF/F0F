@@ -25,7 +25,8 @@ public class F0F {
         // {   runFile(args[0]);   } 
         // else 
         // {   runPrompt();    }
-        run("");
+        runFile("F0F/1st_test");
+        //run("");
     }
 
     private static void runFile(String path) throws IOException {
@@ -50,7 +51,7 @@ public class F0F {
         }
     }
     private static void run(String source) {
-        source = "// First F0F programm \n\tprint(\"Hello World!\");";
+        //source = "// First F0F programm \n\tprint(\"Hello World!\");";
 
         F0FLexer lexer = new F0FLexer(source);
         List<F0FToken> tokens = lexer.scanTokens();
@@ -66,7 +67,7 @@ public class F0F {
         // Stop if there was a resolution error.
         //if (hadError) return;
 
-        //interpreter.interpret(statements); */
+        //interpreter.interpret(statements); 
 
         for(int i = 0; i < tokens.size(); i++){
             System.out.println(tokens.get(i));
