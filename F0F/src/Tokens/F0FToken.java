@@ -1,12 +1,12 @@
 package Tokens;
 public class F0FToken 
 {
-    protected String lex;
-    protected TokenType type;
-    protected Object literal;
-    protected int line;
-    protected int column; //where the lexeme begins in the line
-    protected int length;
+    public final String lex;
+    public final TokenType type;
+    public final Object literal;
+    public final int line;
+    public final int column; //where the lexeme begins in the line
+    public final int length;
     
     public F0FToken(TokenType type, String lexeme, Object literal, int line, int column, int length) 
     {
@@ -34,14 +34,15 @@ public class F0FToken
         equal, equal_equal, excl, excl_equal,
         greater, greater_equal, less, less_equal,
         
-        //literals
-        INT, FLOAT, DOUBLE, VOID, BOOL, STRING, MFUN, POINT ,/* DERIV, */
+        //types
+        INT, /*FLOAT, */DOUBLE, VOID, BOOL, STRING, MFUN, POINT , DERIV, 
         // Floor, Ceil, Round, Random
     
         //keywords
         True, False, Null, And, Or, Def, Return, While, For, If, Else, Print,
 
-        Identifier, Integer, Decimal,
+        //literals
+        Identifier, Integer, Decimal, String_chain,
     
         EOF
     }

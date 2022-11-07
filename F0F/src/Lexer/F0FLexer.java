@@ -5,7 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import Tokens.F0FToken.TokenType;
-import Tokens.F0FToken;
+import Tokens.*;
+import Errors.*;
 
 public class F0FLexer 
 {
@@ -38,12 +39,12 @@ public class F0FLexer
         /*keywords.put("var",    VAR);*/
         keywords.put("while",  TokenType.While);
         keywords.put("mfun",   TokenType.MFUN);
-        keywords.put("Point",  TokenType.POINT);
+        //keywords.put("Point",  TokenType.POINT);
         keywords.put("void",   TokenType.VOID);
         keywords.put("bool",   TokenType.BOOL);
         keywords.put("string", TokenType.STRING);
         keywords.put("int", TokenType.INT);
-        keywords.put("float", TokenType.FLOAT);
+        //keywords.put("float", TokenType.FLOAT);
         keywords.put("double", TokenType.DOUBLE);
     }
     
@@ -180,10 +181,9 @@ public class F0FLexer
             tok_length++;
             advance();
         }
-
         // Unterminated string.
         if (end_file()) {
-            //Lox.error(line, "Unterminated string.");
+            F0FErrors.error(line, "Unterminated string.");
             return;
         }
 
@@ -192,7 +192,7 @@ public class F0FLexer
 
         // Trim the surrounding quotes.
         String value = source_code.substring(start + 1, current - 1);
-        addToken(TokenType.STRING, value);
+        addToken(TokenType.String_chain, value);
     }
     private boolean Digit(char c)
     {
@@ -252,9 +252,10 @@ public class F0FLexer
 
         // See if the identifier is a reserved word.
         String text = source_code.substring(start, current);
-
         TokenType type = keywords.get(text);
-        if (type == null) type = TokenType.Identifier;
+
+        if (type == null) 
+            type = TokenType.Identifier;
         addToken(type, text);
     }
 }

@@ -1,14 +1,16 @@
-//import java.io.BufferedReader;
+
 import java.io.IOException;
-//import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
 import Lexer.*;
-//import Parser.*;
+import Parser.*;
+import Grammar.*;
+//import Errors.*;
 import Tokens.*;
+import tools.*;
 
 public class F0F {
     //private static final Interpreter interpreter = new Interpreter();
@@ -16,19 +18,10 @@ public class F0F {
     static boolean hadRuntimeError = false;
     public static void main(String[] args) throws Exception 
     {
-        // if (args.length > 1) 
-        // {
-        //     System.out.println("Usage: jlox [script]");
-        //     System.exit(64);
-        // } 
-        // else if (args.length == 1) 
-        // {   runFile(args[0]);   } 
-        // else 
-        // {   runPrompt();    }
         runFile("F0F/1st_test");
-        //run("");
-    }
 
+    }
+    
     private static void runFile(String path) throws IOException {
         byte[] bytes = Files.readAllBytes(Paths.get(path));
         run(new String(bytes, Charset.defaultCharset()));
@@ -40,11 +33,12 @@ public class F0F {
     private static void run(String source) {
         F0FLexer lexer = new F0FLexer(source);
         List<F0FToken> tokens = lexer.scanTokens();
-        // Parser parser = new Parser(tokens);
+        F0FParser parser = new F0FParser(tokens);
+        Expression expression = parser.parse();
         // List<Stmt> statements = parser.parse();
 
         // Stop if there was a syntax error.
-        //if (hadError) return;
+        if (hadError) return;
 
         // Resolver resolver = new Resolver(interpreter);
         // resolver.resolve(statements);
@@ -54,8 +48,9 @@ public class F0F {
 
         //interpreter.interpret(statements); 
 
-        for(int i = 0; i < tokens.size(); i++){
+        /* for(int i = 0; i < tokens.size(); i++){
             System.out.println(tokens.get(i));
-        }    
+        }     */
+        System.out.println(new PrettyPrinter().print(expression));
     }
 }
