@@ -223,6 +223,10 @@ def LL_1_top_to_down_parser(grammar:Grammar, P_table:dict = None, firsts = None,
 
     return parser
 
+def LL_1_recursive_descending_parser():
+
+    pass
+
 def LL_1_parsing_table(grammar:Grammar, firsts, follows):
     """LL(1) table:
         if X -> W and t in First(W)   :   T[X,t] = (X -> W)
@@ -265,6 +269,9 @@ def LR_1():
 def SLR_1():
     pass
 
+def LALR_1():
+    pass
+
 # G = Grammar()
 # E = G.New_NonTerminal('E', fix_t['expression'], main_symbol=True)
 # T = G.New_NonTerminal('T', fix_t['term'])
@@ -303,6 +310,6 @@ firsts = First(G)
 follows = Follow(G, firsts)
 # print(follows)
 ll_1_table  = LL_1_parsing_table(G, firsts, follows)
-print(ll_1_table)
+# print(ll_1_table)
 # ll1_parser = LL_1_top_to_down_parser(G, ll_1_table, firsts, follows)
 # print(ll1_parser([num, star, num, star, num, plus, num, star, num, plus, num, plus, num, G.EOF])) # "n * n * n + n * n + n + n $"

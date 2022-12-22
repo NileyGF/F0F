@@ -1,5 +1,4 @@
 from F0FTokens import Token, TokenType, TerminalsTokens, NonTerminalsTokens, symbols_tokens, keywords_tokens
-from F0FGrammar import Terminal, NonTerminal, Production, Sentential_Form, Symbol, EOF, Epsilon, Grammar, F0F_LL_1
 
 class F0FLexer:
     def __init__(self, source_code:str):
@@ -139,6 +138,7 @@ class F0FLexer:
 
     def alpha(self,c:str):
         return (c >= "a" and c <= "z") or (c >= "A" and c <= "Z") or c == "_"
+    
     def number(self):
         decimal = False
         while self.peek().isdigit():
