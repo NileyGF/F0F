@@ -151,7 +151,7 @@ def Follow(grammar:Grammar, firsts:dict):
     #init Follow(Vn)
     for nt in grammar.nonTerminals:
         follows[nt] = ContainerSet()
-    follows[grammar.mainSymbol] = ContainerSet(G.EOF)
+    follows[grammar.mainSymbol] = ContainerSet(grammar.EOF)
     change = True
     while change:
         change = False
@@ -185,15 +185,15 @@ def Follow(grammar:Grammar, firsts:dict):
 
     return follows
 
-def LL_1_top_to_down_parser(grammar:Grammar, P_table:dict = None, firsts = None, follows = None):
+def LL_1_td_parser(grammar:Grammar, P_table:dict = None, firsts = None, follows = None):
     if P_table is None:
         if firsts is None: firsts = First(grammar)
         if follows is None: follows = Follow(grammar, firsts)
         P_table = LL_1_parsing_table(grammar, firsts, follows)
     
-    def parser(w):
+    def parser(w:list):
         if w[len(w) - 1] != grammar.EOF:
-            w += grammar.EOF
+            w.append(grammar.EOF)
         
         stack = [grammar.EOF, grammar.mainSymbol]
         cursor = 0
@@ -207,25 +207,96 @@ def LL_1_top_to_down_parser(grammar:Grammar, P_table:dict = None, firsts = None,
             top:Symbol = stack.pop()
             # print(top)
             term:Token = w[cursor]
-            if top.token_type == term.token_type:
+            if top.token_type.name == term.token_type.name:
                 cursor+=1
             else:
-                prod = P_table[(top,term)]
-                prod:Production
-                output.append(prod)
-                if not prod.Body.IsEpsilon:
-                    alpha = prod.Body
+                prod = P_table.get((top.token_type.name,term.token_type.name))
+                
+                if type(prod) is Production:
+                    prod:Production
+                    output.append(prod)
+                    if not prod.Body.IsEpsilon:
+                        alpha = prod.Body
 
-                    for i in range(len(alpha)-1,-1,-1):
-                        stack.append(alpha[i])
+                        for i in range(len(alpha)-1,-1,-1):
+                            stack.append(alpha[i])
+                elif type(prod) is list:
+                    boolean_mask = [False] * len(prod)
+                    tentative_output = [None] * len(prod)
+                    for i in range(len(prod)):
+                        b, outp = LL_1_td_rd_parser(stack.copy(), P_table, prod[i], w[cursor:], output.copy())
+                        boolean_mask[i] = b
+                        tentative_output[i] = outp
+                    right = 0
+                    ind = -1
+                    for i in range(len(boolean_mask)):
+                        if boolean_mask[i]: 
+                            ind = i
+                            right += 1
+                    if right == 1:
+                        output = tentative_output[ind]
+                        return output
+                    else:
+                        print('parsing error')
+                        return
+                else:
+                    print('parsing error')
+                    return
 
         return output            
 
     return parser
 
-def LL_1_recursive_descending_parser():
+def LL_1_td_rd_parser(stack:list, P_table:dict, prod:Production, subw:list, partial_output:list):
+    """ LL_1_top_to_down_recursive_descending_parser """
+    prod:Production
+    partial_output.append(prod)
+    if not prod.Body.IsEpsilon:
+        alpha = prod.Body
+        for i in range(len(alpha)-1,-1,-1):
+            stack.append(alpha[i])
+    cursor = 0
+    while True:
+        if len(stack) <= 0:
+            break
 
-    pass
+        top:Symbol = stack.pop()
+        term:Token = subw[cursor]
+        if top.token_type.name == term.token_type.name:
+            cursor+=1
+        else:
+            prod = P_table.get((top.token_type.name,term.token_type.name))
+            if not prod:
+                return False, partial_output
+            if type(prod) is Production:
+                prod:Production
+                partial_output.append(prod)
+                if not prod.Body.IsEpsilon:
+                    alpha = prod.Body
+                    for i in range(len(alpha)-1,-1,-1):
+                        stack.append(alpha[i])
+            elif type(prod) is list:
+                boolean_mask = [False] * len(prod)
+                tentative_output = [None] * len(prod)
+                for i in range(len(prod)):
+                    b, outp = LL_1_td_rd_parser(stack.copy(), P_table, prod[i], subw[cursor:], partial_output.copy())
+                    boolean_mask[i] = b
+                    tentative_output[i] = outp
+                right = 0
+                ind = -1
+                for i in range(len(boolean_mask)):
+                    if boolean_mask[i]: 
+                        ind = i
+                        right += 1
+                if right == 1:
+                    partial_output = tentative_output[ind]
+                    return True, partial_output
+                else:
+                    print('parsing error')
+            else:
+                return False, partial_output
+
+    return True, partial_output
 
 def LL_1_parsing_table(grammar:Grammar, firsts, follows):
     """LL(1) table:
@@ -243,24 +314,32 @@ def LL_1_parsing_table(grammar:Grammar, firsts, follows):
         if alpha_first.contains_epsilon:
             X_follow = follows[X]
             for t in X_follow:
-                cell = P_table.get((X,t))
+                cell = P_table.get((X.token_type.name,t.token_type.name))
                 if cell:
-                    if cell is Production and cell.Body.IsEpsilon:
-                        P_table[(X,t)] = pr 
+                    if type(cell) is Production and cell.Body.IsEpsilon:
+                        P_table[(X.token_type.name,t.token_type.name)] = pr 
                     elif pr.Body.IsEpsilon:
                         pass
                     else: 
-                        if cell is Production:
-                            P_table[(X,t)] = [cell, pr]
-                        else: P_table[(X,t)] = cell + [pr]
+                        if type(cell) is Production:
+                            P_table[(X.token_type.name,t.token_type.name)] = [cell, pr]
+                        else: P_table[(X.token_type.name,t.token_type.name)] = cell + [pr]
                         print('except: ',X, t, cell,' new:',pr)
-                else: P_table[(X,t)] = pr 
+                else: P_table[(X.token_type.name,t.token_type.name)] = pr 
         else:
             for t in alpha_first:
-                cell = P_table.get((X,t))
+                cell = P_table.get((X.token_type.name,t.token_type.name))
                 if cell:
-                    print('except:',X,t,cell,' new:',pr)
-                else: P_table[(X,t)] = pr 
+                    if type(cell) is Production and cell.Body.IsEpsilon:
+                        P_table[(X.token_type.name,t.token_type.name)] = pr 
+                    elif pr.Body.IsEpsilon:
+                        pass
+                    else: 
+                        if type(cell) is Production:
+                            P_table[(X.token_type.name,t.token_type.name)] = [cell, pr]
+                        else: P_table[(X.token_type.name,t.token_type.name)] = cell + [pr]
+                        print('except: ',X, t, cell,' new:',pr)
+                else: P_table[(X.token_type.name,t.token_type.name)] = pr 
     return P_table
 
 def LR_1():
@@ -296,7 +375,7 @@ def LALR_1():
 # G.Add_Production(Production(Y,G.Epsilon))
 # G.Add_Production(Production(F,Sentential_Form(num)))
 # G.Add_Production(Production(F,Sentential_Form(opar,E,cpar)))
-G = F0F_LL_1()
+# G = F0F_LL_1()
 # print(G)
 
 # E %= T + X
@@ -305,11 +384,11 @@ G = F0F_LL_1()
 # Y %= star + F + Y | div + F + Y | G.Epsilon
 # F %= num | opar + E + cpar
  
-firsts = First(G)
+# firsts = First(G)
 # print(firsts)
-follows = Follow(G, firsts)
+# follows = Follow(G, firsts)
 # print(follows)
-ll_1_table  = LL_1_parsing_table(G, firsts, follows)
+# ll_1_table  = LL_1_parsing_table(G, firsts, follows)
 # print(ll_1_table)
-# ll1_parser = LL_1_top_to_down_parser(G, ll_1_table, firsts, follows)
+# ll1_parser = LL_1_td_parser(G, ll_1_table, firsts, follows)
 # print(ll1_parser([num, star, num, star, num, plus, num, star, num, plus, num, plus, num, G.EOF])) # "n * n * n + n * n + n + n $"

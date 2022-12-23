@@ -1,6 +1,6 @@
 import F0FTokens
-from Parser_Generators import First, Follow, LL_1_parsing_table, LL_1_top_to_down_parser
-from F0FGrammar import Grammar, Terminal, NonTerminal, Production, Sentential_Form, Symbol, EOF, Epsilon
+from Parser_Generators import First, Follow, LL_1_parsing_table, LL_1_td_parser
+from F0FGrammar import Grammar, F0F_LL_1
 import F0FLexer
 
 class F0F_language():
@@ -27,14 +27,24 @@ class F0F_language():
     @property
     def parser(self):
         PT = LL_1_parsing_table(self.Grammar, self.firsts, self.follows)
-        parser = LL_1_top_to_down_parser(self.Grammar, PT)
+        parser = LL_1_td_parser(self.Grammar, PT)
         return parser
    
 # f = open('1st_test.txt', 'r')
 # code = f.read()
 # f.close()
-code = "// First F0F program \nprint(\"Hello World!\"); \nint x = 56; \nint y = x + 5.7; \nvoid LOL(bool f, char c){ \nwhile(false){} \n	return;\n}\n"
+G = F0F_LL_1()
+ 
+firsts = First(G)
+follows = Follow(G, firsts)
+# print(follows)
+ll_1_table  = LL_1_parsing_table(G, firsts, follows)
+ll1_parser = LL_1_td_parser(G, ll_1_table, firsts, follows)
+
+code = "// First F0F program \nprint \"Hello World!\" ; \nint x = 56; \nint y = x + 5.7; \nfun void LOL(bool f, string c){ \nwhile(false){} \n	return;\n}\n"
 lexer = F0FLexer.F0FLexer(code)
-print(code)
-print()
-print(lexer.tokens)
+# print(code)
+# print()
+# print(lexer.tokens)
+tree = ll1_parser(lexer.tokens)
+print(tree)

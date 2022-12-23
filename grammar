@@ -1,0 +1,122 @@
+# program -> declaration_list EOF
+# declaration_list -> declaration declaration_list
+# declaration_list -> epsilon
+
+# declaration -> class_decl
+# declaration -> funct_decl
+# declaration -> var_decl
+# declaration -> statement
+
+# statement -> expression ;
+# statement -> for_statement
+# statement -> while_statement
+# statement -> if_statement
+# statement -> print_statement8
+# statement -> return_statement
+# statement -> block
+
+# expression -> assignment
+
+# assignment -> call id = assignment
+# assignment -> id = assignment
+# assignment -> logic_or
+
+# logic_or -> logic_and OR
+# OR -> || logic_and OR
+# OR -> epsilon
+
+# logic_and -> equality AND
+# AND -> && equality AND
+# AND -> epsilon
+
+# equality -> comparison eql
+# eql -> == comparison eql
+# eql -> != comparison eql
+# eql -> epsilon
+
+# comparison -> term LGEq
+# LGEq -> < term LGEq
+# LGEq -> <= term LGEq
+# LGEq -> > term LGEq
+# LGEq -> >= term LGEq
+# LGEq -> epsilon
+
+# term -> factor FX
+# FX -> + factor FX
+# FX -> - factor FX
+# FX -> epsilon
+
+# factor -> pow UX
+# UX -> * pow UX
+# UX -> / pow UX
+# UX -> % pow UX
+# UX -> epsilon
+
+# pow -> unary PowX
+# PowX -> ^ unary PowX
+# PowX -> epsilon  
+
+# unary -> ! unary
+# unary -> - unary
+# unary -> call		unary -> primary
+
+# call -> primary call_type
+
+# call_type -> . call_rigth call_type
+# call_type -> [ expression ] call_type
+# call_type -> epsilon
+# call_right -> id call_type
+# call_right -> ( arguments ) call_type
+
+# primary -> true 
+# primary -> false
+# primary -> null
+# primary -> this 
+# primary -> integer 
+# primary -> decimal
+# primary -> string_chain 
+# primary -> id
+# primary -> ( expression )
+
+# for_statement -> for ( for_first expression ; expression ) statement
+# for_first -> var_decl 
+# for_first -> expression ; 
+
+# while_statement -> while ( expression ) statement
+
+# if_statement -> if ( expression ) statement else_stmt
+# else_stmt -> else statement
+# else_stmt -> epsilon
+
+# print_statement -> print expression ;
+
+# return_statement -> return ret
+# ret -> expression ;
+# ret -> ;
+
+# block -> { block_body }
+# block_body -> declaration
+# block_body -> epsilon
+
+# class_decl -> class id { funct_list }
+
+# funct_list -> funct_decl funct_list
+# funct_list -> epsilon
+
+# funct_decl -> fun id ( parameters ) block
+
+# var_decl -> type id var_value
+# var_value -> = expression ;
+# var_value -> ;            
+
+# parameters -> type id parm
+# parameters -> epsilon
+# parm -> , type id parm
+# parm -> epsilon
+
+# arguments -> expression args
+# arguments -> epsilon
+# args -> , expression args
+# args -> epsilon
+
+

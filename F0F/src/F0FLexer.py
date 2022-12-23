@@ -28,7 +28,10 @@ class F0FLexer:
     def scan_Token(self):
         c = self.advance()
         # switch()
-        if c == '(' or c == ')' or c == '[' or c == ']' \
+        if c == ' ' or c == '\r' or c == '\t':
+            #consume empty spaces
+            self.token_length = 0        
+        elif c == '(' or c == ')' or c == '[' or c == ']' \
             or c == '{' or c == '}' or c == ',' or c == '.'\
             or c == '-' or c == '+' or c == '*' or c == '^' or c == ';':
 
@@ -70,8 +73,6 @@ class F0FLexer:
             else:
                 self.token_length += 1
                 self.add_Token(symbols_tokens['/'])
-        elif c == ' ' or c == '\r' or c == '\t':
-            self.token_length = 0
         elif c == '\n':
             self.line += 1
             self.token_length = 0

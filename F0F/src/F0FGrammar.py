@@ -94,7 +94,10 @@ class Epsilon(Terminal, Sentential_Form):
     
     def __hash__(self):
         return hash("")
-        
+
+    def __iter__(self):
+        yield self
+
     @property
     def IsEpsilon(self):
         return True

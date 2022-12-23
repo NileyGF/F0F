@@ -45,12 +45,12 @@ class TerminalsTokens(TokenType):
     """ literals """
     true = 'true'
     false = 'false'
-    integer = 0
-    decimal = 1
-    string_chain = 2
-    identifier = 3
+    integer = 'integer'
+    decimal = 'decimal'
+    string_chain = 'string_chain'
+    identifier = 'id'
     """ end of file"""
-    EOF = 4
+    EOF = '$'
     """ types """
     _type = ['int', 'double', 'void', 'bool', 'string', 'mfun', 'point' ]
     # _int = 'int'
@@ -62,7 +62,7 @@ class TerminalsTokens(TokenType):
     # _point = 'point' 
     # Floor, Ceil, Round, Random
 
-    epsilon = 35
+    epsilon = 'epsilon'
     pass
 
 class NonTerminalsTokens(TokenType):
@@ -71,45 +71,45 @@ class NonTerminalsTokens(TokenType):
     Declaration = 2
     ClassDecl = 3
     FunctDecl = 4
-    FunctList = 'ups'
-    VarDecl = 5
-    VarValue = 'sub'
-    Statement = 6
-    Expression = 7
-    ForStmt = 8
-    ForFirst = 'sub'
-    WhileStmt = 9
-    IfStmt = 10
-    elseStmt = 'sub'
-    PrintStmt = 11
-    ReturnStmt = 12
-    ret = 'sub'
-    Block = 13
-    block_body = 'sub'
-    Assignment = 14
-    Call = 15
-    Logic_Or = 16
-    OR = 17
-    Logic_And = 18
-    AND = 'ups'
-    Equality = 19
-    Eq = 20
-    Comparison = 21
-    LGEq = 22
-    Term = 23
-    Factor = 24
-    FX = 25
-    Pow = 26 # Pow -> Unary ^ Unary
-    UX = 27
-    PowX = 'ups2'
-    Unary = 28
-    call_type = 29
-    call_right = 'add'
-    Primary = 30
-    Parameters = 31
-    Parm = 32
-    Arguments = 33
-    Arg = 34
+    FunctList = 5
+    VarDecl = 6
+    VarValue = 7
+    Statement = 8
+    Expression = 9
+    ForStmt = 10
+    ForFirst = 11
+    WhileStmt = 12
+    IfStmt = 13
+    elseStmt = 14
+    PrintStmt = 15
+    ReturnStmt = 16
+    ret = 17
+    Block = 18
+    block_body = 19
+    Assignment = 20
+    Call = 21
+    Logic_Or = 22
+    OR = 23
+    Logic_And = 24
+    AND = 25
+    Equality = 26
+    Eq = 27
+    Comparison = 28
+    LGEq = 29
+    Term = 30
+    Factor = 31
+    FX = 32
+    Pow = 33 # Pow -> Unary ^ Unary
+    UX = 34
+    PowX = 35
+    Unary = 36
+    call_type = 37
+    call_right = 38
+    Primary = 39
+    Parameters = 40
+    Parm = 41
+    Arguments = 42
+    Arg = 43
 
 # TokenType = Enum('TokenType', '')
 class Token:
