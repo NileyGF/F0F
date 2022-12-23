@@ -113,6 +113,12 @@ class Production:
     def IsEpsilon(self):
         return self.Body.IsEpsilon
 
+class AttributedProduction(Production):
+    def __init__(self, nonTerminal: NonTerminal, sentential: Sentential_Form, attributes):
+        super().__init__(nonTerminal, sentential)
+        self.attributes = attributes
+    def syntetice(self):
+        pass
 
 class Grammar():
     
@@ -340,8 +346,9 @@ class F0F_LL_1(Grammar):
             # assignment -> call id = assignment
             # assignment -> id = assignment
             # assignment -> logic_or
-            Production(nonTerminals[14],Sentential_Form(nonTerminals[15],terminals[41],terminals[17],nonTerminals[14])),
-            Production(nonTerminals[14],Sentential_Form(terminals[41],terminals[17],nonTerminals[14])),
+            # Production(nonTerminals[14],Sentential_Form(nonTerminals[15],terminals[41],terminals[17],nonTerminals[14])),
+            Production(nonTerminals[14],Sentential_Form(nonTerminals[15],terminals[17],nonTerminals[14])),
+            # Production(nonTerminals[14],Sentential_Form(terminals[41],terminals[17],nonTerminals[14])),
             Production(nonTerminals[14],Sentential_Form(nonTerminals[16])),
             # logic_or -> logic_and OR
             # OR -> || logic_and OR
@@ -455,13 +462,14 @@ class F0F_LL_1(Grammar):
             # ret -> expression ;
             # ret -> ;
             Production(nonTerminals[12],Sentential_Form(terminals[31],nonTerminals[40])),
+            # Production(nonTerminals[12],Sentential_Form(terminals[31],nonTerminals[7], terminals[12])),
             Production(nonTerminals[40],Sentential_Form(nonTerminals[7], terminals[12])),
             Production(nonTerminals[40],Sentential_Form(terminals[12])),
             # block -> { block_body }
-            # block_body -> declaration
+            # block_body -> declaration_list
             # block_body -> epsilon
             Production(nonTerminals[13],Sentential_Form(terminals[10],nonTerminals[41],terminals[11])),
-            Production(nonTerminals[41],Sentential_Form(nonTerminals[2])),
+            Production(nonTerminals[41],Sentential_Form(nonTerminals[1])),
             Production(nonTerminals[41],self.Epsilon),
             # class_decl -> class id { funct_list }
             Production(nonTerminals[3], Sentential_Form(terminals[25],terminals[41],terminals[10],nonTerminals[42],terminals[11])),
@@ -469,8 +477,8 @@ class F0F_LL_1(Grammar):
             # funct_list -> epsilon
             Production(nonTerminals[42],Sentential_Form(nonTerminals[4], nonTerminals[42])),
             Production(nonTerminals[42],self.Epsilon),            
-            # funct_decl -> fun id ( parameters ) block
-            Production(nonTerminals[4], Sentential_Form(terminals[26],terminals[41],terminals[4], nonTerminals[34],terminals[5], nonTerminals[13])),
+            # funct_decl -> fun type id ( parameters ) block
+            Production(nonTerminals[4], Sentential_Form(terminals[26],terminals[42],terminals[41],terminals[4], nonTerminals[34],terminals[5], nonTerminals[13])),
             # var_decl -> type id var_value
             # var_value -> = expression ;
             # var_value -> ;            
