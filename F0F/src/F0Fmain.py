@@ -65,13 +65,12 @@ def main(file_path:str=None):
     else:
         print("Usage error: you must pass a file path")
 
-# if __name__ == "__main__":
-#     # print(sys.argv)
-#     main(sys.argv[1])
+if __name__ == "__main__":
+    main(sys.argv[1])
 
-f = open('F0F/src/1st_test.txt', 'r')
-code = f.read()
-f.close()
+# f = open('F0F/src/1st_test.txt', 'r')
+# code = f.read()
+# f.close()
 # G = F0F()
  
 # firsts = First(G)
@@ -80,13 +79,13 @@ f.close()
 # ll_1_table  = LL_1_parsing_table(G, firsts, follows)
 
 # code = "// First F0F program \nprint \"Hello World!\" ; \nint x = 56; \nint y = x + 5.7; \nfun void LOL(bool f, string c){ \nwhile(false){} \n	return;\n}\n"
-lexer = F0FLexer.F0FLexer(code)
-had_error = lexer.had_error 
-error_list = lexer.lexer_errors
-G = F0F()
-parser = LL1_Parser(lexer.tokens,G)
-had_error = had_error or parser.had_error 
-error_list = error_list + parser.parser_errors
-print('had error: ',had_error)
-print(error_list)
+# lexer = F0FLexer.F0FLexer(code)
+# had_error = lexer.had_error 
+# error_list = lexer.lexer_errors
+# G = F0F()
+# parser = LL1_Parser(lexer.tokens,G)
+# had_error = had_error or parser.had_error 
+# error_list = error_list + parser.parser_errors
+# print('had error: ',had_error)
+# print(error_list)
 # print(tree)
