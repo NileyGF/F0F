@@ -31,6 +31,7 @@ class TerminalsTokens(TokenType):
     less_equal = '<='
     """ keywords """
     _class = 'class' 
+    Forge = 'Forge'
     function = 'fun'
     null = 'null'
     this = 'this'
@@ -52,7 +53,7 @@ class TerminalsTokens(TokenType):
     """ end of file"""
     EOF = '$'
     """ types """
-    _type = ['int', 'double', 'void', 'bool', 'string', 'mfun', 'point' ]
+    _type = ['int', 'double', 'void', 'bool', 'string'] # , 'mfun', 'point' ]
     # _int = 'int'
     # _double = 'double'
     # _void = 'void'
@@ -110,8 +111,11 @@ class NonTerminalsTokens(TokenType):
     Parm = 41
     Arguments = 42
     Arg = 43
+    F0F = 44
+    Statement_List = 45
+    Operation = 46
 
-# TokenType = Enum('TokenType', '')
+
 class Token:
     """
     Basic token class.
@@ -173,26 +177,28 @@ symbols_tokens = {
     '||'  : TerminalsTokens.Or,
 }
 keywords_tokens = {
-    'class'  : TerminalsTokens._class,
+    # 'class'  : TerminalsTokens._class,
     'fun'    : TerminalsTokens.function,
     'null'   : TerminalsTokens.null,
-    'this'   : TerminalsTokens.this,
+    # 'this'   : TerminalsTokens.this,
     'return' : TerminalsTokens.Return,
     'while'  : TerminalsTokens.While,
     'for'    : TerminalsTokens.For,
     'if'     : TerminalsTokens.If,
     'else'   : TerminalsTokens.Else,
-    'print'  : TerminalsTokens.Print,
+    # 'print'  : TerminalsTokens.Print,
     'true'   : TerminalsTokens.true,
     'false'  : TerminalsTokens.false,
     'type'   : TerminalsTokens._type,
     'void'   : TerminalsTokens._type,
     'int'    : TerminalsTokens._type,
     'double' : TerminalsTokens._type,
+    'char'   : TerminalsTokens._type,
     'bool'   : TerminalsTokens._type,
     'string' : TerminalsTokens._type,
     'mfun'   : TerminalsTokens._type,
-    'point'  : TerminalsTokens._type
+    'point'  : TerminalsTokens._type,
+    'Forge'  : TerminalsTokens.Forge
 }
 
 # fixed_tokens = symbols_tokens + keywords_tokens + {

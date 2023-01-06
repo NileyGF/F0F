@@ -1,0 +1,107 @@
+# program -> declaration_list F0F EOF
+
+# declaration_list -> declaration declaration_list
+# declaration_list -> epsilon
+
+# declaration -> funct_decl
+# declaration -> var_decl
+# declaration -> statement
+
+# statement_list -> var_decl statement_list
+# statement_list -> statement statement_list
+# statement_list -> epsilon
+
+# F0F -> Forge ( parameters ) { statement_list }
+
+# funct_decl -> fun type id ( parameters ) { statement_list }
+
+# var_decl -> type id var_value
+# var_value -> = expression ;
+# var_value -> ;   
+
+# statement -> expression ;
+# statement -> for_statement
+# statement -> while_statement
+# statement -> if_statement
+# statement -> return_statement
+
+# for_statement -> for ( var_decl expression ; expression ) { statement_list }
+
+# while_statement -> while ( expression ) { statement_list }
+
+# if_statement -> if ( expression ) { statement_list } else_stmt
+# else_stmt -> else { statement_list }
+# else_stmt -> epsilon
+
+# return_statement -> return ret
+# ret -> expression ;
+# ret -> ;
+
+# parameters -> type id parm
+# parameters -> epsilon
+# parm -> , type id parm
+# parm -> epsilon
+
+# arguments -> expression args
+# arguments -> epsilon
+# args -> , expression args
+# args -> epsilon
+
+# expression -> call = expression
+# expression -> operation
+
+# operation -> logic_and OR
+# OR -> || operation
+# OR -> epsilon
+
+# logic_and -> equality AND
+# AND -> && logic_and
+# AND -> epsilon
+
+# equality -> comparison eql
+# eql -> == equality
+# eql -> != equality
+# eql -> epsilon
+
+# comparison -> term LGEq
+# LGEq -> < comparison
+# LGEq -> <= comparison
+# LGEq -> > comparison
+# LGEq -> >= comparison
+# LGEq -> >= comparison
+# LGEq -> epsilon
+
+# term -> factor FX
+# FX -> + term
+# FX -> - term
+# FX -> epsilon
+
+# factor -> pow PowX
+# PowX -> * factor
+# PowX -> / factor
+# PowX -> % factor
+# PowX -> epsilon
+
+# pow -> unary UX
+# UX -> ^ pow
+# UX -> epsilon
+
+# unary -> ! unary
+# unary -> - unary
+# unary -> call
+
+# call -> primary call_type 
+
+# call_type -> . id call_type
+# call_type -> [ expression ] call_type
+# call_type -> ( arguments ) call_type
+# call_type -> epsilon
+
+# primary -> true 
+# primary -> false
+# primary -> null
+# primary -> integer 
+# primary -> decimal
+# primary -> string_chain 
+# primary -> id
+# primary -> ( expression )

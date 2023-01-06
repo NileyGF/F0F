@@ -89,7 +89,7 @@ class String_chain(AtomicNode):
     pass
 
 class Logic_NOT(UnaryNode):
-    def __init__(self, node:Bool):
+    def __init__(self, node:Node):
         super().__init__(node)
         
     @staticmethod
@@ -188,20 +188,6 @@ class Sum(Term):
         return lvalue + rvalue
     pass
 class Minus(Term):
-    def __init__(self, left:Node, right:Node):
-        self.left = left
-        self.right = right
-
-    def evaluate(self):
-        lvalue = self.left.evaluate()
-        rvalue = self.right.evaluate()
-        try:
-            lvalue = float(lvalue)
-            rvalue = float(rvalue)
-            return self.operate(lvalue, rvalue)
-        except:
-            print('semantic error') 
-
     @staticmethod
     def operate(lvalue, rvalue):
         return lvalue - rvalue
@@ -211,16 +197,6 @@ class Comparison(Expr,BinaryNode):
     def __init__(self, left:Node, right:Node):
         self.left = left
         self.right = right
-
-    def evaluate(self):
-        lvalue = self.left.evaluate()
-        rvalue = self.right.evaluate()
-        try:
-            lvalue = Bool(lvalue)
-            rvalue = Bool(rvalue)
-            return self.operate(lvalue, rvalue)
-        except:
-            print('semantic error') 
     pass
 class Less(Comparison):
     @staticmethod
@@ -244,25 +220,56 @@ class Greater_Equal(Comparison):
     pass
 
 class Eql(Expr,BinaryNode):
+    def __init__(self, left:Node, right:Node):
+        self.left = left
+        self.right = right
     pass
 class Equality(Eql):
+    @staticmethod
+    def operate(lvalue, rvalue):
+        return lvalue == rvalue
     pass
 class Unequality(Eql):
+    @staticmethod
+    def operate(lvalue, rvalue):
+        return lvalue != rvalue
     pass
 
 class Logic_OR(Expr,BinaryNode):
-    """
-        logic_or -> logic_and OR
-        OR -> || logic_and OR
-        OR -> epsilon
-    """
+    def __init__(self, left:Node, right:Node):
+        self.left = left
+        self.right = right
+
+    def evaluate(self):
+        lvalue = self.left.evaluate()
+        rvalue = self.right.evaluate()
+        try:
+            lvalue = Bool(lvalue)
+            rvalue = Bool(rvalue)
+            return self.operate(lvalue, rvalue)
+        except:
+            print('semantic error') 
+    @staticmethod
+    def operate(lvalue, rvalue):
+        return lvalue or rvalue
     pass
 class Logic_AND(Expr,BinaryNode):
-    """
-        logic_and -> equality AND
-        AND -> && equality AND
-        AND -> epsilon
-    """
+    def __init__(self, left:Node, right:Node):
+        self.left = left
+        self.right = right
+
+    def evaluate(self):
+        lvalue = self.left.evaluate()
+        rvalue = self.right.evaluate()
+        try:
+            lvalue = Bool(lvalue)
+            rvalue = Bool(rvalue)
+            return self.operate(lvalue, rvalue)
+        except:
+            print('semantic error') 
+    @staticmethod
+    def operate(lvalue, rvalue):
+        return lvalue and rvalue
     pass
 
 

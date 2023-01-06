@@ -1,5 +1,6 @@
-from F0FGrammar import Terminal, NonTerminal, Production, Sentential_Form, Symbol, EOF, Epsilon, Grammar, F0F_LL_1
+from F0FGrammar import Terminal, NonTerminal, Production, Sentential_Form, Symbol, EOF, Epsilon, Grammar, F0F
 from F0FTokens import Token, TokenType, NonTerminalsTokens
+from F0FErrors import ParsingError
 
 class ContainerSet:
     def __init__(self, *values, contains_epsilon=False):
@@ -238,10 +239,10 @@ def LL_1_td_parser(grammar:Grammar, P_table:dict = None, firsts = None, follows 
                         return output
                     else:
                         print('parsing error')
-                        return
+                        raise Exception
                 else:
                     print('parsing error')
-                    return
+                    raise Exception
 
         return output            
 
@@ -293,6 +294,7 @@ def LL_1_td_rd_parser(stack:list, P_table:dict, prod:Production, subw:list, part
                     return True, partial_output
                 else:
                     print('parsing error')
+                    raise Exception
             else:
                 return False, partial_output
 
@@ -316,30 +318,38 @@ def LL_1_parsing_table(grammar:Grammar, firsts, follows):
             for t in X_follow:
                 cell = P_table.get((X.token_type.name,t.token_type.name))
                 if cell:
-                    if type(cell) is Production and cell.Body.IsEpsilon:
-                        P_table[(X.token_type.name,t.token_type.name)] = pr 
-                    elif pr.Body.IsEpsilon:
-                        pass
-                    else: 
-                        if type(cell) is Production:
-                            P_table[(X.token_type.name,t.token_type.name)] = [cell, pr]
-                        else: P_table[(X.token_type.name,t.token_type.name)] = cell + [pr]
-                        print('except: ',X, t, cell,' new:',pr)
-                else: P_table[(X.token_type.name,t.token_type.name)] = pr 
+                    # already something in the cell. Is not LL1
+                    # print('except in cell (',X,', ', t,') = ', cell,'\tnew:',pr)
+                    # if type(cell) is Production and cell.Body.IsEpsilon:
+                    #     P_table[(X.token_type.name,t.token_type.name)] = pr 
+                    # elif pr.Body.IsEpsilon:
+                    #     pass
+                    # else: 
+                    if type(cell) is Production:
+                        # first collide in cell
+                        P_table[(X.token_type.name,t.token_type.name)] = [cell, pr]
+                    else:  # cell is a list, already more than one path for this one
+                        P_table[(X.token_type.name,t.token_type.name)] = cell + [pr]
+                else: 
+                    P_table[(X.token_type.name,t.token_type.name)] = pr 
         else:
             for t in alpha_first:
                 cell = P_table.get((X.token_type.name,t.token_type.name))
                 if cell:
-                    if type(cell) is Production and cell.Body.IsEpsilon:
-                        P_table[(X.token_type.name,t.token_type.name)] = pr 
-                    elif pr.Body.IsEpsilon:
-                        pass
-                    else: 
-                        if type(cell) is Production:
-                            P_table[(X.token_type.name,t.token_type.name)] = [cell, pr]
-                        else: P_table[(X.token_type.name,t.token_type.name)] = cell + [pr]
-                        print('except: ',X, t, cell,' new:',pr)
-                else: P_table[(X.token_type.name,t.token_type.name)] = pr 
+                    # already something in the cell. Is not LL1
+                    # print('except in cell (',X,', ', t,') = ', cell,'\tnew:',pr)
+                    # if type(cell) is Production and cell.Body.IsEpsilon:
+                    #     P_table[(X.token_type.name,t.token_type.name)] = pr 
+                    # elif pr.Body.IsEpsilon:
+                    #     pass
+                    # else: 
+                    if type(cell) is Production:
+                        # first collide in cell
+                        P_table[(X.token_type.name,t.token_type.name)] = [cell, pr]
+                    else:  # cell is a list, already more than one path for this one
+                        P_table[(X.token_type.name,t.token_type.name)] = cell + [pr]
+                else: 
+                    P_table[(X.token_type.name,t.token_type.name)] = pr 
     return P_table
 
 def LR_1():
@@ -375,7 +385,7 @@ def LALR_1():
 # G.Add_Production(Production(Y,G.Epsilon))
 # G.Add_Production(Production(F,Sentential_Form(num)))
 # G.Add_Production(Production(F,Sentential_Form(opar,E,cpar)))
-# G = F0F_LL_1()
+# G = F0F()
 # print(G)
 
 # E %= T + X

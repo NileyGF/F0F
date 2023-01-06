@@ -1,11 +1,13 @@
 from F0FTokens import Token, TokenType, TerminalsTokens, NonTerminalsTokens, symbols_tokens, keywords_tokens
-
+from F0FErrors import F0FError, LexerError
 class F0FLexer:
     def __init__(self, source_code:str):
         self.start = 0
         self.current = 0
         self.line = 1
         self.token_length = 0
+        self.had_error = False
+        self.lexer_errors = []
 
         if not source_code: raise Exception()
         self.source_code = source_code
@@ -76,6 +78,8 @@ class F0FLexer:
         elif c == '\n':
             self.line += 1
             self.token_length = 0
+        # elif c == '\'':
+        #     pass
         elif c == '\"':
             self.string_chain()
         else:
@@ -86,8 +90,8 @@ class F0FLexer:
                 self.token_length +=1
                 self.identifier()
             else: 
-                # Lox.error(line, "Unexpected character.")
-                pass
+                self.had_error = True
+                self.lexer_errors.append(LexerError(self.line, "Unexpected character."))
 
     def end_file(self):
         return self.current >= len(self.source_code)
@@ -128,6 +132,8 @@ class F0FLexer:
         
         # unterminated string
         if self.end_file():
+            self.had_error = True
+            self.lexer_errors.append(LexerError(self.line, "Unterminated string"))
             # F0FErrors.error(line, "Unterminated string.");
             pass
 
