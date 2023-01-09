@@ -1,15 +1,23 @@
 from F0FTokens import Token, TokenType, TerminalsTokens, NonTerminalsTokens
+from F0FGrammar import Terminal, NonTerminal, Production, Sentential_Form, Symbol, EOF, Epsilon
+from F0FErrors import SemanticError
+from F0FParser import PT_node,Parse_Tree
+import Visitor
 
 class Node:
+    def __init__(self) -> None:
+        self.semantic_errors =[]
+
     def evaluate(self):
         raise NotImplementedError()
 
 class AtomicNode(Node):
-    def __init__(self, lex):
-        self.lex = lex
-
+    def __init__(self,token:Token):
+        super().__init__()
+        self.lex = token.lex
 class UnaryNode(Node):
-    def __init__(self, node):
+    def __init__(self, node:Node):
+        super().__init__()
         self.node = node
 
     def evaluate(self):
@@ -19,9 +27,9 @@ class UnaryNode(Node):
     @staticmethod
     def operate(value):
         raise NotImplementedError()
-
 class BinaryNode(Node):
-    def __init__(self, left, right):
+    def __init__(self, left:Node, right:Node):
+        super().__init__()
         self.left = left
         self.right = right
 
@@ -34,82 +42,160 @@ class BinaryNode(Node):
     def operate(lvalue, rvalue):
         raise NotImplementedError()
 
-class Expr:
-    pass
-
-class Bool(AtomicNode):
+class Literal(AtomicNode):
+    def evaluate(self):
+        return self.value
+class NULL(Literal):
+    def __init__(self,token:Token):
+        super().__init__(token)
+        self.value = None
+class Bool(Literal):
     # primary -> true 
     # primary -> false
-    def __init__(self, lex:str):
-        if lex == 'true' or lex == 'false':
-            if lex == 'true':
-                self.value = True
-            elif lex == 'false':
-                self.value = False
-            super().__init__(lex)
-        else: print('semantic error')
-
-    def evaluate(self):
-        return self.value
     pass
-class Num(AtomicNode):
-    def __init__(self, lex:str):
-        self.value = float(lex)
-        super().__init__(lex)    
+class TRUE(Bool):
+    def __init__(self,token:Token):
+        super().__init__(token)
+        self.value = True
+class FALSE(Bool):
+    def __init__(self,token:Token):
+        super().__init__(token)
+        self.value = False
 
-    def evaluate(self):
-        return self.value
+class Num(Literal):
     pass
 class Integer(Num):
-    def __init__(self, lex: str):
-        super().__init__(lex)
+    def __init__(self,token:Token):
+        super().__init__(token)
         try:
-            self.value = int(lex)
+            self.value = int(token.lex)
         except:
-            print('semantic error')
-    pass
+            error = SemanticError(token.line,'The value is not an integer.')
+            print(error)
+            self.semantic_errors.append(error)
 class Decimal(Num):
-    def __init__(self, lex: str):
-        super().__init__(lex)
+    def __init__(self,token:Token):
+        super().__init__(token)
         try:
-            self.value = float(lex)
-        except:
-            print('semantic error')
+            self.value = float(token.lex)
+        except:            
+            error = SemanticError(token.line,'The value is not numeric.')
+            print(error)
+            self.semantic_errors.append(error)
+
+class String_chain(Literal):
+    def __init__(self, token: Token):
+        super().__init__(token)
+        try:
+            self.value = str(token.lex)
+        except:            
+            error = SemanticError(token.line,'The value is not a string.')
+            print(error)
+            self.semantic_errors.append(error)
+
+class Type(Node):
     pass
-class String_chain(AtomicNode):
-    def __init__(self, lex:str):
-        super().__init__(lex)
-        try:
-            self.value = str(lex)
-        except:
-            print('semantic error') 
-        
+class INT(Type):
+    def __init__(self):
+        super().__init__()
+class DOUBLE(Type):
+    def __init__(self):
+        super().__init__()
+class VOID(Type):
+    def __init__(self):
+        super().__init__()
+class BOOL(Type):
+    def __init__(self):
+        super().__init__()
+class STRING(Type):
+    def __init__(self):
+        super().__init__()
+class MFUN(Type):
+    def __init__(self):
+        super().__init__()
+class POINT(Type):
+    def __init__(self):
+        super().__init__()
+
+class Identifier(AtomicNode):
+    def __init__(self, token:Token):
+        super().__init__(token)
+        self.name=token.lex
     def evaluate(self):
-        return self.value
-    pass
+        return self.name
+
+
+class Variable(Node):
+    def __init__(self, type:Type, id:Identifier):
+        self.type = type
+        self.name = id
+
+# class Expr(Node):
+#     """ expression -> call = expression
+#         expression -> operation
+#     """    
+#     pass
+
+
+
+# class Argument(Expr):
+#     def __init__(self,expression:Expr):
+#             self.expression = expression
+#     def accept(self,visitor: Visitor):
+#         return visitor.visitUnaryExpr(self)
+#     def evaluate(self):
+#         return self.expression.evaluate()
+
+# class Parameter(Node):
+#     def __init__(self,var:Variable):
+#             self.variable = var
+#     def accept(self,visitor: Visitor):
+#         return visitor.visitVariableExpr(self)
+#     def evaluate(self):
+#         return self.variable.evaluate()
+
+
 
 class Logic_NOT(UnaryNode):
     def __init__(self, node:Node):
         super().__init__(node)
-        
+    def evaluate(self):
+        value = self.node.evaluate()
+        try:
+            value = bool(value)
+            return self.operate(value)
+        except:
+            error = SemanticError('Invalid ! operation with a non boolean value.')
+            print(error)
+            self.semantic_errors.append(error) 
     @staticmethod
     def operate(value):
         return not value
-    pass
 class Negate(UnaryNode):
-    def __init__(self, node:Num):
+    def __init__(self, node:Node):
         super().__init__(node)
-        
+    def evaluate(self):
+        value = self.node.evaluate()
+        try:
+            value = float(value)
+            return self.operate(value)
+        except:
+            error = SemanticError('Invalid negate operation with a non numeric value.')
+            print(error)
+            self.semantic_errors.append(error) 
     @staticmethod
     def operate(value):
         return  0 - value
     pass
 
 class Factor(BinaryNode):
-    def __init__(self, left:Node, right:Node):
-        self.left = left
-        self.right = right
-
+    def __init__(self, left: Node, right: Node):
+        super().__init__(left, right)
+class Mult(Factor):
+    @staticmethod
+    def operate(lvalue, rvalue):
+        return lvalue * rvalue
+    
     def evaluate(self):
         lvalue = self.left.evaluate()
         rvalue = self.right.evaluate()
@@ -118,13 +204,9 @@ class Factor(BinaryNode):
             rvalue = float(rvalue)
             return self.operate(lvalue, rvalue)
         except:
-            print('semantic error') 
-    pass
-class Mult(Factor):
-    @staticmethod
-    def operate(lvalue, rvalue):
-        return lvalue * rvalue
-    pass
+            error = SemanticError('Product operands must be numbers.')
+            print(error)
+            self.semantic_errors.append(error) 
 class Div(Factor):
     def evaluate(self):
         lvalue = self.left.evaluate()
@@ -133,11 +215,15 @@ class Div(Factor):
             lvalue = float(lvalue)
             rvalue = float(rvalue)
             if rvalue == 0:
-                print('zero division error') 
+                error = SemanticError('Zero division error.')
+                print(error)
+                self.semantic_errors.append(error) 
                 return
             return self.operate(lvalue, rvalue)
         except:
-            print('semantic error') 
+            error = SemanticError('Division operands must be numbers..')
+            print(error)
+            self.semantic_errors.append(error) 
 
     @staticmethod
     def operate(lvalue, rvalue):
@@ -151,26 +237,24 @@ class Module(Factor):
             lvalue = float(lvalue)
             rvalue = float(rvalue)
             if rvalue == 0:
-                print('zero division error') 
+                error = SemanticError('Zero division error.')
+                print(error)
+                self.semantic_errors.append(error) 
                 return
             return self.operate(lvalue, rvalue)
         except:
-            print('semantic error') 
+            error = SemanticError('Module operands must be numbers.')
+            print(error)
+            self.semantic_errors.append(error) 
 
     @staticmethod
     def operate(lvalue, rvalue):
         return lvalue % rvalue    
     pass
-class Pow(Expr,BinaryNode):
-    @staticmethod
-    def operate(lvalue, rvalue):
-        return lvalue ** rvalue
-    pass
 
-class Term(Expr,BinaryNode):
-    def __init__(self, left:Node, right:Node):
-        self.left = left
-        self.right = right
+class Pow(BinaryNode):
+    def __init__(self, left: Node, right: Node):
+        super().__init__(left, right)
 
     def evaluate(self):
         lvalue = self.left.evaluate()
@@ -180,24 +264,64 @@ class Term(Expr,BinaryNode):
             rvalue = float(rvalue)
             return self.operate(lvalue, rvalue)
         except:
-            print('semantic error') 
+            error = SemanticError('Power(^) operands must be numbers..')
+            print(error)
+            self.semantic_errors.append(error) 
+
+    @staticmethod
+    def operate(lvalue, rvalue):
+        return lvalue ** rvalue
+    pass
+
+class Term(BinaryNode):
+    def __init__(self, left: Node, right: Node):
+        super().__init__(left, right)
     pass
 class Sum(Term):
+    def evaluate(self):
+        lvalue = self.left.evaluate()
+        rvalue = self.right.evaluate()
+        try:
+            return self.operate(lvalue, rvalue)
+        except:
+            error = SemanticError('Invalid sum operation.')
+            print(error)
+            self.semantic_errors.append(error) 
     @staticmethod
     def operate(lvalue, rvalue):
         return lvalue + rvalue
     pass
 class Minus(Term):
+    def evaluate(self):
+        lvalue = self.left.evaluate()
+        rvalue = self.right.evaluate()
+        try:
+            lvalue = float(lvalue)
+            rvalue = float(rvalue)
+            return self.operate(lvalue, rvalue)
+        except:
+            error = SemanticError('Substraction operands must be numbers.')
+            print(error)
+            self.semantic_errors.append(error) 
     @staticmethod
     def operate(lvalue, rvalue):
         return lvalue - rvalue
     pass
 
-class Comparison(Expr,BinaryNode):
-    def __init__(self, left:Node, right:Node):
-        self.left = left
-        self.right = right
-    pass
+class Comparison(BinaryNode):
+    def __init__(self, left: Node, right: Node):
+        super().__init__(left, right)
+    def evaluate(self):
+        lvalue = self.left.evaluate()
+        rvalue = self.right.evaluate()
+        try:
+            lvalue = float(lvalue)
+            rvalue = float(rvalue)
+            return self.operate(lvalue, rvalue)
+        except:
+            error = SemanticError('Comparison operands must be numbers.')
+            print(error)
+            self.semantic_errors.append(error) 
 class Less(Comparison):
     @staticmethod
     def operate(lvalue, rvalue):
@@ -219,10 +343,9 @@ class Greater_Equal(Comparison):
         return lvalue >= rvalue
     pass
 
-class Eql(Expr,BinaryNode):
-    def __init__(self, left:Node, right:Node):
-        self.left = left
-        self.right = right
+class Eql(BinaryNode):
+    def __init__(self, left: Node, right: Node):
+        super().__init__(left, right)
     pass
 class Equality(Eql):
     @staticmethod
@@ -235,10 +358,9 @@ class Unequality(Eql):
         return lvalue != rvalue
     pass
 
-class Logic_OR(Expr,BinaryNode):
-    def __init__(self, left:Node, right:Node):
-        self.left = left
-        self.right = right
+class Logic_OR(BinaryNode):
+    def __init__(self, left: Node, right: Node):
+        super().__init__(left, right)
 
     def evaluate(self):
         lvalue = self.left.evaluate()
@@ -248,15 +370,15 @@ class Logic_OR(Expr,BinaryNode):
             rvalue = Bool(rvalue)
             return self.operate(lvalue, rvalue)
         except:
-            print('semantic error') 
+            error = SemanticError('Invalid || operation')
+            print(error)
+            self.semantic_errors.append(error)
     @staticmethod
     def operate(lvalue, rvalue):
         return lvalue or rvalue
-    pass
-class Logic_AND(Expr,BinaryNode):
-    def __init__(self, left:Node, right:Node):
-        self.left = left
-        self.right = right
+class Logic_AND(BinaryNode):
+    def __init__(self, left: Node, right: Node):
+        super().__init__(left, right)
 
     def evaluate(self):
         lvalue = self.left.evaluate()
@@ -266,133 +388,183 @@ class Logic_AND(Expr,BinaryNode):
             rvalue = Bool(rvalue)
             return self.operate(lvalue, rvalue)
         except:
-            print('semantic error') 
+            error = SemanticError('Invalid && operation')
+            print(error)
+            self.semantic_errors.append(error)
     @staticmethod
     def operate(lvalue, rvalue):
         return lvalue and rvalue
+
+class Call(Node):
+    """
+        call -> primary call_type 
+        call_type -> . id call_type
+        call_type -> [ expression ] call_type
+        call_type -> ( arguments ) call_type
+        call_type -> epsilon
+    """
+    def __init__(self,caller):
+        self.caller = caller
+    def accept(self, visitor: Visitor):
+        return visitor.visitCallExpr(self)
     pass
+class DotCall(Call):
+    """ call_type -> . id call_type """
+    def __init__(self,caller,property):
+        super().__init__(caller)
+        self.property = property
+class ParenCall(Call):
+    """ call_type -> ( arguments ) call_type """
+    def __init__(self, caller,args:list):
+        super().__init__(caller)
+        self.arguments = args
 
-
-class Assignment(Expr):
+class Assignment(Node):
     """
-        assignment -> call id = assignment
-        assignment -> id = assignment
-        assignment -> logic_or
+        expression -> call = expression
     """
+    def __init__(self,call:Call,expression:Node):
+        super().__init__()
+        self.left = call
+        self.right = expression
+    def accept(self,visitor: Visitor):
+        return visitor.visitAssignExpr(self)
     pass
-
-
-class Declaration:
-    """ 
-        declaration -> class_decl
-        declaration -> funct_decl
-        declaration -> var_decl
-        declaration -> statement
-    """
-    pass
-
-class Class(Declaration):
-    """ class_decl -> class id { funct_list } """
-    def __init__(self, id:TerminalsTokens, function_list:list ):
-        super().__init__()
-        self.name = id
-        self.methods = function_list
-
-class Function(Declaration):
-    """ funct_decl -> fun id ( parameters ) block """
-    def __init__(self, id:TerminalsTokens, parameters_list:list, body:list):
-        super().__init__()
-        self.name = id
-        self.parameters = parameters_list
-        self.body = body
-
-class Variable(Declaration):
-    """
-        var_decl -> type id var_value
-        var_value -> = expression ;
-        var_value -> ;  
-    """
-    def __init__(self, type:TerminalsTokens, id:TerminalsTokens, initializer:Expr):
-        super().__init__()
-        self.name = id
-        self.type = type
-        self.initializer = initializer
-
-class Statement:
+class Statement(Node):
     """
         statement -> expression ;
         statement -> for_statement
         statement -> while_statement
         statement -> if_statement
-        statement -> print_statement8
         statement -> return_statement
-        statement -> block 
     """
     pass
-
-class Expression(Statement):
-    def __init__(self, expression:Expr):
-        super().__init__()
+class ExpressionStmt(Statement):
+    """ statement -> expression ; """
+    def __init__(self,expression:Expr):
         self.expression = expression
+    def accept(self, visitor: Visitor):
+        return visitor.visitExpressionStmt
 
-class For(Statement):
+class VariableDecl(Statement):
     """
-        for_statement -> for ( for_first expression ; expression ) statement
-        for_first -> var_decl 
-        for_first -> expression ; 
+        var_decl -> type id var_value
+        var_value -> = expression ;
+        var_value -> ;   
     """
-    def __init__(self):
+    def __init__(self, var:Variable, initializer:Node=None):
         super().__init__()
+        self.var = var
+        self.initializer = initializer
+    def initialized(self):
+        return (self.initializer == None)
+    def accept(self, visitor: Visitor):
+        return visitor.visitVarStmt(self)
+
+class Function(Statement):
+    """ funct_decl -> fun type id ( parameters ) { statement_list } """
+    def __init__(self,type:Type, id:Identifier, parameters_list:list, body:list):
+        super().__init__()
+        self.type = type
+        self.name = id
+        self.parameters = parameters_list
+        self.body = body
+    def accept(self, visitor: Visitor):
+        return visitor.visitFunctionStmt(self)
+class Forge(Function):
+    """ F0F -> Forge ( parameters ) { statement_list } """
+    def __init__(self,forge:Token, parameters_list: list, body: list):
+        super().__init__(POINT(), Identifier(forge), parameters_list, body)
 
 class While(Statement):
-    """ while_statement -> while ( expression ) statement """
-    def __init__(self, condition:Expr, body:Statement):
-        super().__init__() 
+    """ while_statement -> while ( expression ) { statement_list } """
+    def __init__(self, condition:Node, body:list):
+        super().__init__()
         self.condition = condition
         self.body = body
-
+    def accept(self, visitor: Visitor):
+        return visitor.visitWhileStmt(self)
+class For(Statement):
+    def __init__(self,initializer:VariableDecl, loop:While):
+        super().__init__()
+        self.initializer = initializer
+        self.loop = loop
+class Else(Statement):
+    """
+        else_stmt -> else { statement_list }
+    """
+    def __init__(self, body:list):
+        self.body = body
+    def accept(self, visitor: Visitor):
+        return visitor.visitIfStmt(self)
 class If(Statement):
     """
-        if_statement -> if ( expression ) statement else_stmt
-        else_stmt -> else statement
-        else_stmt -> epsilon
+        if_statement -> if ( expression ) { statement_list } else_stmt
     """
-    def __init__(self, condition:Expr, body:Statement, else_branch:Statement):
+    def __init__(self, condition:Node, body:list, else_branch:Else=None):
         super().__init__()
         self.condition = condition
         self.body = body
         self.else_branch = else_branch
-
-class Print(Statement):
-    """ print_statement -> print expression ; """
-    def __init__(self, expression:Expr):
-        super().__init__()
-        self.expression = expression
-
+    def accept(self, visitor: Visitor):
+        return visitor.visitIfStmt(self)
 class Return(Statement):
     """
         return_statement -> return ret
         ret -> expression ;
         ret -> ;
     """
-    def __init__(self, expression:Expr):
+    def __init__(self, expression:Node=None):
         super().__init__()
         self.expression = expression
+    def accept(self, visitor: Visitor):
+        return visitor.visitReturnStmt(self)
 
-class Block(Statement):
-    """
-        block -> { block_body }
-        block_body -> declaration_list
-        block_body -> epsilon
-    """
-    def __init__(self, declaration_list:list):
+class Program(Node):
+    def __init__(self, declarations:list, forge:Forge):
         super().__init__()
-        self.declaration_list = declaration_list
+        self.declarations = declarations
+        self.forge = forge
+    def evaluate(self):
+        return super().evaluate()
+    
+# class StatementList(Node):
+#     """
+#         statement_list -> var_decl statement_list
+#         statement_list -> statement statement_list
+#         statement_list -> epsilon
+#     """
+#     def __init__(self,list:list):
+#         self.list = list
 
-class AST():
-    def __init__(self):
+
+
+class Visitor:
+    def  visitAssignExpr(expr:Assignment):
         pass
-
-    def ast_from_parse_tree(parse_tree_root):
-
+    def  visitBinaryExpr(expr:BinaryNode):
         pass
+    def  visitCallExpr(expr:Call):
+        pass
+    def  visitLiteralExpr(expr:Literal):
+        pass
+    def  visitUnaryExpr(expr:UnaryNode):
+        pass
+    def  visitVariableExpr(expr:Variable):
+        pass    
+
+
+    def visitExpressionStmt(stmt:ExpressionStmt):
+        pass    
+    def visitFunctionStmt(stmt:Function):
+        pass    
+    def visitIfStmt(stmt:If):
+        pass    
+    def visitReturnStmt(stmt:Return):
+        pass    
+    def visitVarStmt(stmt:Variable):
+        pass    
+    def visitWhileStmt(stmt:While):
+        pass    
+    pass
+

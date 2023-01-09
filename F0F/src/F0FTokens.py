@@ -53,7 +53,7 @@ class TerminalsTokens(TokenType):
     """ end of file"""
     EOF = '$'
     """ types """
-    _type = ['int', 'double', 'void', 'bool', 'string'] # , 'mfun', 'point' ]
+    _type = ['int', 'double', 'void', 'bool', 'string', 'mfun', 'point' ]
     # _int = 'int'
     # _double = 'double'
     # _void = 'void'

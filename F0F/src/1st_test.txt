@@ -1,8 +1,0 @@
-// Forge your best wapon to defeat those functions
-
-
-
-Forge (mfun f, double min, double max)
-{
-	
-}

@@ -1,0 +1,8 @@
+// Forge your best weapon to defeat those functions
+
+
+
+Forge (mfun f, double min, double max)
+{
+	
+}

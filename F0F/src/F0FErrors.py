@@ -13,9 +13,6 @@ class F0FError:
 class LexerError(F0FError):
     pass
 class ParsingError(F0FError):
-    """
-    Base class for all parsing exceptions.
-    """
     def __init__(self, token:Token, msg:str):
         super().__init__(token.line,msg)
         self._token_prblm = token
@@ -24,3 +21,6 @@ class ParsingError(F0FError):
     def __str__(self) -> str:        
         rep = "Parsing error at: " + str(self._token_prblm.lex) +" [line " + str(self.line) + "] : " + self.message
         return rep
+class SemanticError(F0FError):
+
+    pass

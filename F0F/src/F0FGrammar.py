@@ -1,5 +1,4 @@
 from F0FTokens import Token, TokenType, TerminalsTokens, NonTerminalsTokens
-# from Parser_Generators import First, Follow, LL_1_parsing_table, LL_1_top_to_down_parser
 
 class Symbol(Token):
 
@@ -190,7 +189,7 @@ class Grammar():
         except KeyError:
             return None
     
-class F0F_LL_1(Grammar):
+""" class F0F_LL_1(Grammar):
     def __init__(self):
         nonTerminals = [
             #0
@@ -516,6 +515,7 @@ class F0F_LL_1(Grammar):
         self.Productions = Productions
 
     pass
+ """
 
 class F0F(Grammar):
     def __init__(self):
@@ -732,7 +732,6 @@ class F0F(Grammar):
             # LGEq -> <= comparison
             # LGEq -> > comparison
             # LGEq -> >= comparison
-            # LGEq -> >= comparison
             # LGEq -> epsilon
             Production(nonTerminals[27],Sentential_Form(nonTerminals[29],nonTerminals[28])),
             Production(nonTerminals[28],Sentential_Form(terminals[21],nonTerminals[27])),
@@ -777,7 +776,7 @@ class F0F(Grammar):
             # call_type -> ( arguments ) call_type
             # call_type -> epsilon
             Production(nonTerminals[37],Sentential_Form(terminals[7], terminals[40],nonTerminals[37])),
-            Production(nonTerminals[37],Sentential_Form(terminals[8], nonTerminals[12],terminals[9], nonTerminals[37])),
+            # Production(nonTerminals[37],Sentential_Form(terminals[8], nonTerminals[12],terminals[9], nonTerminals[37])),
             Production(nonTerminals[37],Sentential_Form(terminals[4], nonTerminals[15],terminals[5], nonTerminals[37])),
             Production(nonTerminals[37],self.Epsilon),
             # primary -> true 
@@ -805,7 +804,3 @@ class F0F(Grammar):
         self.terminals = terminals
         self.symbDict = symbDict
         self.Productions = Productions
-
-    pass
-
-# print(F0F())

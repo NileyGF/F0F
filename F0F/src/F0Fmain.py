@@ -3,7 +3,8 @@ import F0FTokens
 from Parser_Generators import First, Follow, LL_1_parsing_table, LL_1_td_parser
 from F0FGrammar import Grammar, F0F
 import F0FLexer
-from F0FParser import LL1_Parser
+from F0FParser import LL1_Parser, Parse_Tree
+from AST import AST
 
 class F0F_language():
     def __init__(self, G:Grammar):
@@ -46,12 +47,21 @@ def run(code):
     had_error = lexer.had_error 
     error_list = lexer.lexer_errors
     G = F0F()
-    parser = LL1_Parser(lexer.tokens,G)
+    parser = LL1_Parser(G)
+    parser.begin(lexer.tokens)
     had_error = had_error or parser.had_error 
     error_list = error_list + parser.parser_errors
     if had_error:
         return had_error, error_list
-    #resolver
+    
+    tree = Parse_Tree()
+    tree.parse_tree_from_prod_list(parser.left_parse)
+    # print(tree)
+    ast = AST.ast_from_parse_tree(tree)
+    # resolver
+    
+    # interpret
+    ast.interpret()
 
     if had_error:
         return had_error, error_list
@@ -65,14 +75,14 @@ def main(file_path:str=None):
     else:
         print("Usage error: you must pass a file path")
 
-if __name__ == "__main__":
-    main(sys.argv[1])
+# if __name__ == "__main__":
+#     main(sys.argv[1])
 
-# f = open('F0F/src/1st_test.txt', 'r')
-# code = f.read()
-# f.close()
-# G = F0F()
- 
+f = open('F0F/src/code_examples/Basic.txt', 'r')
+code = f.read()
+f.close()
+G = F0F()
+run(code)
 # firsts = First(G)
 # follows = Follow(G, firsts)
 # # print(follows)
@@ -86,6 +96,8 @@ if __name__ == "__main__":
 # parser = LL1_Parser(lexer.tokens,G)
 # had_error = had_error or parser.had_error 
 # error_list = error_list + parser.parser_errors
-# print('had error: ',had_error)
-# print(error_list)
+# # print('had error: ',had_error)
+# # print(error_list)
+# tree = Parse_Tree()
+# tree.parse_tree_from_prod_list(parser.left_parse)
 # print(tree)
