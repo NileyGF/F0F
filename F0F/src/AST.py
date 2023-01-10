@@ -3,8 +3,8 @@ from F0FGrammar import Terminal, NonTerminal, Production, Sentential_Form, Symbo
 from AST_nodes import *
 from F0FParser import PT_node,Parse_Tree
 
-types = {'int':INT(), 'double':DOUBLE(), 
-             'void':VOID(), 'bool':BOOL(), 'string':STRING()} # , 'mfun', 'point' ]
+types = {'int':INT(), 'double':DOUBLE(), 'void':VOID(), 'bool':BOOL(), 
+         'string':STRING(), 'mfun':MFUN(), 'point':POINT() }
 
 class AST():
     def __init__(self, root:Node = None):
@@ -13,9 +13,6 @@ class AST():
             self.initialized = True
         else: 
             self.initialized = False
-
-    def interpret(self):
-        self.root.evaluate()
 
     def ast_from_parse_tree(parse_tree:Parse_Tree):
         # Build the AST        
