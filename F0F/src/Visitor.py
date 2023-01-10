@@ -42,8 +42,10 @@ class Interpreter(Visitor):
         self.had_semantic_error = False
         self.had_runtime_error = False
         self.locals  = {} # [Node] = depth
-        self.globals = None
-        self.enviroment = None
+        self.globals = Enviroment()
+        self.enviroment = self.globals
+        self.globals.define('clock',globals_clock())
+
     def interpret(self, program:Program):
         try:
             for stmt in program.declarations:

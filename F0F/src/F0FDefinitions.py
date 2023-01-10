@@ -1,4 +1,5 @@
 import AST_nodes
+import time
 from F0FErrors import *
 class Return_asExc(RuntimeError):
     def __init__(self, value) -> None:
@@ -9,6 +10,11 @@ class Callable:
         pass
     def call(self,interpreter, arguments:list):
         pass
+class globals_clock(Callable):
+    def arity(self) -> int:
+        return 0
+    def call(self, interpreter, arguments: list):
+        return time.time()
 
 class F0FFunctions(Callable):
     def __init__(self,declaration:AST_nodes.Function,closure, isInitializer):

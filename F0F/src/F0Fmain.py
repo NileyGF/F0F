@@ -1,5 +1,6 @@
 import sys
 import F0FTokens
+from Visitor import Interpreter
 from Parser_Generators import First, Follow, LL_1_parsing_table, LL_1_td_parser
 from F0FGrammar import Grammar, F0F
 import F0FLexer
@@ -56,12 +57,13 @@ def run(code):
     
     tree = Parse_Tree()
     tree.parse_tree_from_prod_list(parser.left_parse)
-    # print(tree)
+    print(tree)
     ast = AST.ast_from_parse_tree(tree)
     # resolver
     
     # interpret
-    ast.interpret()
+    interpreter = Interpreter()
+    interpreter.interpret(ast.root)
 
     if had_error:
         return had_error, error_list

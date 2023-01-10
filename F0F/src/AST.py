@@ -3,8 +3,8 @@ from F0FGrammar import Terminal, NonTerminal, Production, Sentential_Form, Symbo
 from AST_nodes import *
 from F0FParser import PT_node,Parse_Tree
 
-types = {'int':INT(), 'double':DOUBLE(), 'void':VOID(), 'bool':BOOL(), 
-         'string':STRING(), 'mfun':MFUN(), 'point':POINT() }
+# types_dict = {'int':INT(), 'double':DOUBLE(), 'void':VOID(), 'bool':BOOL(), 
+#          'string':STRING(), 'mfun':MFUN(), 'point':POINT() }
 
 class AST():
     def __init__(self, root:Node = None):
@@ -16,7 +16,7 @@ class AST():
 
     def ast_from_parse_tree(parse_tree:Parse_Tree):
         # Build the AST        
-        if type(parse_tree.root.symbol) is NonTerminalsTokens.Program:
+        if parse_tree.root.symbol.token_type == NonTerminalsTokens.Program:
             declarations = AST._declaration_list(parse_tree.root.children[0])
             forge = AST._forge(parse_tree.root.children[1])
             root = Program(declarations,forge)
@@ -108,11 +108,11 @@ class AST():
         return declarations
     def _declaration(node:PT_node) -> Node:
         # declaration -> funct_decl | var_decl | statement
-        if type(node.children[0].symbol.token_type) is NonTerminalsTokens.FunctDecl:
+        if node.children[0].symbol.token_type == NonTerminalsTokens.FunctDecl:
             return AST._function_dec(node.children[0])
-        elif type(node.children[0].symbol.token_type) is NonTerminalsTokens.VarDecl:
+        elif node.children[0].symbol.token_type == NonTerminalsTokens.VarDecl:
             return AST._variable_dec(node.children[0])
-        elif type(node.children[0].symbol.token_type) is NonTerminalsTokens.VarDecl:
+        elif node.children[0].symbol.token_type == NonTerminalsTokens.VarDecl:
             return AST._statement(node.children[0])
         pass
     def _forge(node:PT_node) -> Forge:
@@ -142,7 +142,22 @@ class AST():
         id = AST._identifier(id_node)
         return Variable(vtype,id)
     def _type(node:PT_node) -> Type:
-        return types[node.symbol.lex]
+        # types_dict = {'int':INT(), 'double':DOUBLE(), 'void':VOID(), 'bool':BOOL(), 
+        #          'string':STRING(), 'mfun':MFUN(), 'point':POINT() }
+        if node.symbol.lex == 'int':
+            return INT(node)
+        elif node.symbol.lex == 'double':
+            return DOUBLE(node)
+        elif node.symbol.lex == 'void':
+            return VOID(node)
+        elif node.symbol.lex == 'bool':
+            return BOOL(node)
+        elif node.symbol.lex == 'string':
+            return STRING(node)
+        elif node.symbol.lex == 'mfun':
+            return MFUN(node)
+        elif node.symbol.lex == 'point':
+            return POINT(node)
     def _identifier(node:PT_node) -> Identifier:
         return Identifier(node.symbol)
     def _statement_list(node:PT_node) -> list:
@@ -160,15 +175,15 @@ class AST():
         return stmts
     def _statement(node:PT_node) -> Node:
         # statement ->  expression ; | for_stmt | while_stmt | if_stmt | return_stmt 
-        if type(node.children[0].symbol.token_type) is NonTerminalsTokens.Expression:
+        if node.children[0].symbol.token_type == NonTerminalsTokens.Expression:
             return AST._expression(node.children[0])
-        elif type(node.children[0].symbol.token_type) is NonTerminalsTokens.ForStmt:
+        elif node.children[0].symbol.token_type == NonTerminalsTokens.ForStmt:
             return AST._for(node.children[0])
-        elif type(node.children[0].symbol.token_type) is NonTerminalsTokens.WhileStmt:
+        elif node.children[0].symbol.token_type == NonTerminalsTokens.WhileStmt:
             return AST._while(node.children[0])
-        if type(node.children[0].symbol.token_type) is NonTerminalsTokens.IfStmt:
+        if node.children[0].symbol.token_type == NonTerminalsTokens.IfStmt:
             return AST._if(node.children[0])
-        elif type(node.children[0].symbol.token_type) is NonTerminalsTokens.ReturnStmt:
+        elif node.children[0].symbol.token_type == NonTerminalsTokens.ReturnStmt:
             return AST._return(node.children[0])
     def _parameter_list(node:PT_node) -> list:
         # parameters -> type id parm | epsilon
@@ -275,9 +290,9 @@ class AST():
         while not eql.children[0].symbol.IsEpsilon:
             n:PT_node = eql.children[1]
             right = AST._comparison(n.children[0])
-            if type(eql.children[0].symbol.token_type) is TerminalsTokens.equal_equal:
+            if eql.children[0].symbol.token_type == TerminalsTokens.equal_equal:
                 left = Equality(left,right)
-            elif type(eql.children[0].symbol.token_type) is TerminalsTokens.excl_equal:
+            elif eql.children[0].symbol.token_type == TerminalsTokens.excl_equal:
                 left = Unequality(left,right)
             eql = n.children[1]
         return left
@@ -289,13 +304,13 @@ class AST():
         while not lgeq.children[0].symbol.IsEpsilon:
             n:PT_node = lgeq.children[1]
             right = AST._term(n.children[0])
-            if type(lgeq.children[0].symbol.token_type) is TerminalsTokens.less:
+            if lgeq.children[0].symbol.token_type == TerminalsTokens.less:
                 left = Less(left,right)
-            elif type(lgeq.children[0].symbol.token_type) is TerminalsTokens.less_equal:
+            elif lgeq.children[0].symbol.token_type == TerminalsTokens.less_equal:
                 left = Less_Equal(left,right)
-            elif type(lgeq.children[0].symbol.token_type) is TerminalsTokens.greater:
+            elif lgeq.children[0].symbol.token_type == TerminalsTokens.greater:
                 left = Greater(left,right)
-            elif type(lgeq.children[0].symbol.token_type) is TerminalsTokens.greater_equal:
+            elif lgeq.children[0].symbol.token_type == TerminalsTokens.greater_equal:
                 left = Greater_Equal(left,right)
             lgeq = n.children[1]
         return left
@@ -307,9 +322,9 @@ class AST():
         while not fx.children[0].symbol.IsEpsilon:
             n:PT_node = fx.children[1]
             right = AST._factor(n.children[0])
-            if type(fx.children[0].symbol.token_type) is TerminalsTokens.plus:
+            if fx.children[0].symbol.token_type == TerminalsTokens.plus:
                 left = Sum(left,right)
-            elif type(fx.children[0].symbol.token_type) is TerminalsTokens.minus:
+            elif fx.children[0].symbol.token_type == TerminalsTokens.minus:
                 left = Minus(left,right)
             fx = n.children[1]
         return left
@@ -321,11 +336,11 @@ class AST():
         while not px.children[0].symbol.IsEpsilon:
             n:PT_node = px.children[1]
             right = AST._pow(n.children[0])
-            if type(px.children[0].symbol.token_type) is TerminalsTokens.star:
+            if px.children[0].symbol.token_type == TerminalsTokens.star:
                 left = Mult(left,right)
-            elif type(px.children[0].symbol.token_type) is TerminalsTokens.slash:
+            elif px.children[0].symbol.token_type == TerminalsTokens.slash:
                 left = Div(left,right)
-            elif type(px.children[0].symbol.token_type) is TerminalsTokens.percent:
+            elif px.children[0].symbol.token_type == TerminalsTokens.percent:
                 left = Module(left,right)
             px = n.children[1]
         return left
@@ -343,9 +358,9 @@ class AST():
         if len(node.children) == 1:
             return AST._call(node.children[0])
         unary = AST._unary(node.children[1])
-        if type(node.children[0].symbol.token_type) is TerminalsTokens.excl:
+        if node.children[0].symbol.token_type == TerminalsTokens.excl:
             return Logic_NOT(unary)
-        elif type(node.children[0].symbol.token_type) is TerminalsTokens.minus:
+        elif node.children[0].symbol.token_type == TerminalsTokens.minus:
             return Negate(unary)
     def _call(node:PT_node) -> Node:
         # call -> primary call_type 
@@ -353,12 +368,12 @@ class AST():
         prim = AST._primary(node.children[0])
         ctype:PT_node = node.children[1]
         while not ctype.children[0].symbol.IsEpsilon:
-            if type(ctype.children[0].symbol.token_type) is TerminalsTokens.dot:
+            if ctype.children[0].symbol.token_type == TerminalsTokens.dot:
                 # id = AST._identifier(node.children[1])
                 # prim = DotCall(prim,id)
                 # ctype = ctype.children[2]
                 pass
-            elif type(ctype.children[0].symbol.token_type) is TerminalsTokens.opar:
+            elif ctype.children[0].symbol.token_type == TerminalsTokens.opar:
                 args = AST._argument_list(node.children[1])
                 prim = ParenCall(prim,args)
                 ctype = ctype.children[3]
@@ -366,19 +381,19 @@ class AST():
     def _primary(node:PT_node) -> Node:
         # primary -> true | false | null | integer | decimal | string_chain | id | ( expression )
         if len(node.children) == 1:
-            if type(node.children[0].symbol.token_type) is TerminalsTokens.true:
+            if node.children[0].symbol.token_type == TerminalsTokens.true:
                 return TRUE(node.children[0].symbol)
-            elif type(node.children[0].symbol.token_type) is TerminalsTokens.false:
+            elif node.children[0].symbol.token_type == TerminalsTokens.false:
                 return FALSE(node.children[0].symbol)
-            elif type(node.children[0].symbol.token_type) is TerminalsTokens.null:
+            elif node.children[0].symbol.token_type == TerminalsTokens.null:
                 return NULL(node.children[0].symbol)
-            elif type(node.children[0].symbol.token_type) is TerminalsTokens.integer:
+            elif node.children[0].symbol.token_type == TerminalsTokens.integer:
                 return Integer(node.children[0].symbol)
-            elif type(node.children[0].symbol.token_type) is TerminalsTokens.decimal:
+            elif node.children[0].symbol.token_type == TerminalsTokens.decimal:
                 return Decimal(node.children[0].symbol)    
-            elif type(node.children[0].symbol.token_type) is TerminalsTokens.string_chain:
+            elif node.children[0].symbol.token_type == TerminalsTokens.string_chain:
                 return String_chain(node.children[0].symbol)
-            elif type(node.children[0].symbol.token_type) is TerminalsTokens.identifier:
+            elif node.children[0].symbol.token_type == TerminalsTokens.identifier:
                 return AST._identifier(node.children[0])
         else:
             return AST._expression(node.children[1])
