@@ -1,5 +1,5 @@
 from AST_nodes import *
-from F0FFunctions import *
+from F0FDefinitions import *
 from F0FErrors import SemanticError, RuntimeF0FError
 
 class Visitor:

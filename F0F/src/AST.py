@@ -354,9 +354,10 @@ class AST():
         ctype:PT_node = node.children[1]
         while not ctype.children[0].symbol.IsEpsilon:
             if type(ctype.children[0].symbol.token_type) is TerminalsTokens.dot:
-                id = AST._identifier(node.children[1])
-                prim = DotCall(prim,id)
-                ctype = ctype.children[2]
+                # id = AST._identifier(node.children[1])
+                # prim = DotCall(prim,id)
+                # ctype = ctype.children[2]
+                pass
             elif type(ctype.children[0].symbol.token_type) is TerminalsTokens.opar:
                 args = AST._argument_list(node.children[1])
                 prim = ParenCall(prim,args)
