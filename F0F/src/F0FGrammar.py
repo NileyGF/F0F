@@ -2,8 +2,11 @@ from F0FTokens import Token, TokenType, TerminalsTokens, NonTerminalsTokens
 
 class Symbol(Token):
 
-    def __init__(self, lex: str, token_type:TokenType):
-        super().__init__(lex, token_type)
+    def __init__(self, lex: str='', token_type:TokenType=None,token:Token = None):
+        if token != None:
+            super().__init__(token.lex, token.token_type,token.line,token.length)
+        else:
+            super().__init__(lex, token_type)
 
     def __str__(self):
         return self.lex
@@ -563,7 +566,7 @@ class F0F(Grammar):
             Terminal('return', TerminalsTokens.Return),
             Terminal('fun', TerminalsTokens.function),
             Terminal('null',  TerminalsTokens.null),
-            Terminal('_type', TerminalsTokens._type),
+            Terminal('var', TerminalsTokens.var),
             # 35
             Terminal('true', TerminalsTokens.true),
             Terminal('false', TerminalsTokens.false),
@@ -572,7 +575,8 @@ class F0F(Grammar):
             Terminal('string_chain', TerminalsTokens.string_chain),
             #40
             Terminal('id', TerminalsTokens.identifier),
-            Terminal('Forge', TerminalsTokens.Forge)
+            Terminal('Forge', TerminalsTokens.Forge),
+            Terminal('print',TerminalsTokens.Print)
         ]
         nonTerminals = [
             # 0 
@@ -620,8 +624,9 @@ class F0F(Grammar):
             # 35
             NonTerminal('UX'              , NonTerminalsTokens.UX),
             NonTerminal('primary'         , NonTerminalsTokens.Primary),
-            NonTerminal('call_type'       , NonTerminalsTokens.call_type)
-            # 38   
+            NonTerminal('call_type'       , NonTerminalsTokens.call_type),
+            NonTerminal('print_statement' , NonTerminalsTokens.PrintStmt)
+            # 39
         ]
 
         self.mainSymbol = nonTerminals[0]
@@ -654,7 +659,7 @@ class F0F(Grammar):
             # F0F -> Forge ( parameters ) { statement_list }
             Production(nonTerminals[7], Sentential_Form(terminals[41],terminals[4], nonTerminals[13],terminals[5], terminals[10],nonTerminals[6], terminals[11])),
             # funct_decl -> fun type id ( parameters ) { statement_list }
-            Production(nonTerminals[3], Sentential_Form(terminals[32],terminals[34],terminals[40],terminals[4], nonTerminals[13],terminals[5], terminals[10],nonTerminals[6], terminals[11])),
+            Production(nonTerminals[3], Sentential_Form(terminals[32],terminals[40],terminals[4], nonTerminals[13],terminals[5], terminals[10],nonTerminals[6], terminals[11])),
             # var_decl -> type id var_value
             # var_value -> = expression ;
             # var_value -> ;   
@@ -666,11 +671,13 @@ class F0F(Grammar):
             # statement -> while_statement
             # statement -> if_statement
             # statement -> return_statement
+            # statement -> print_statement
             Production(nonTerminals[5], Sentential_Form(nonTerminals[12],terminals[12])),
             Production(nonTerminals[5], Sentential_Form(nonTerminals[8])),
             Production(nonTerminals[5], Sentential_Form(nonTerminals[9])),
             Production(nonTerminals[5], Sentential_Form(nonTerminals[10])),
             Production(nonTerminals[5], Sentential_Form(nonTerminals[11])),
+            Production(nonTerminals[5], Sentential_Form(nonTerminals[38])),
             # for_statement -> for ( var_decl expression ; expression ) { statement_list }
             Production(nonTerminals[8], Sentential_Form(terminals[29],terminals[4], nonTerminals[4], nonTerminals[12],terminals[12],nonTerminals[12],terminals[5], terminals[10],nonTerminals[6], terminals[11])),
             # while_statement -> while ( expression ) { statement_list }
@@ -678,7 +685,7 @@ class F0F(Grammar):
             # if_statement -> if ( expression ) { statement_list } else_stmt
             # else_stmt -> else { statement_list }
             # else_stmt -> epsilon
-            Production(nonTerminals[10],Sentential_Form(terminals[27],terminals[4], nonTerminals[12],terminals[10],nonTerminals[6], terminals[11],nonTerminals[17])),
+            Production(nonTerminals[10],Sentential_Form(terminals[27],terminals[4], nonTerminals[12],terminals[5], terminals[10],nonTerminals[6], terminals[11],nonTerminals[17])),
             Production(nonTerminals[17],Sentential_Form(terminals[28],terminals[10],nonTerminals[6], terminals[11])),
             Production(nonTerminals[17],self.Epsilon),
             # return_statement -> return ret
@@ -687,13 +694,15 @@ class F0F(Grammar):
             Production(nonTerminals[11],Sentential_Form(terminals[31],nonTerminals[18])),
             Production(nonTerminals[18],Sentential_Form(nonTerminals[12],terminals[12])),
             Production(nonTerminals[18],Sentential_Form(terminals[12])),
+            # print_statement -> print ( expression ) ;
+            Production(nonTerminals[38],Sentential_Form(terminals[42],terminals[4], nonTerminals[12],terminals[5], terminals[12])),
             # parameters -> type id parm
             # parameters -> epsilon
             # parm -> , type id parm
             # parm -> epsilon
-            Production(nonTerminals[13],Sentential_Form(terminals[34],terminals[40],nonTerminals[14])),
+            Production(nonTerminals[13],Sentential_Form(terminals[40],nonTerminals[14])),
             Production(nonTerminals[13],self.Epsilon),
-            Production(nonTerminals[14],Sentential_Form(terminals[6], terminals[34],terminals[40],nonTerminals[14])),
+            Production(nonTerminals[14],Sentential_Form(terminals[6],terminals[40],nonTerminals[14])),
             Production(nonTerminals[14],self.Epsilon),
             # arguments -> expression args
             # arguments -> epsilon

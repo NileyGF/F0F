@@ -17,15 +17,21 @@ class globals_clock(Callable):
         return time.time()
 
 class F0FFunctions(Callable):
-    def __init__(self,declaration:AST_nodes.Function,closure, isInitializer):
+    def __init__(self,declaration:AST_nodes.Function,closure):
         super().__init__()
         self.declaration = declaration
         self.closure = closure
-        self.isInitializer = isInitializer
     def arity(self) -> int:
         return len(self.declaration.parameters)
     def call(self, interpreter, arguments: list):
-        return super().call(arguments)
+        env = Enviroment(self.closure)
+        for i in range(self.arity()):
+            env.define(self.declaration.parameters[i].name,arguments[i])
+        try: 
+            interpreter.executeBlock(self.declaration.body,env)
+        except Return_asExc as ret:
+            return ret.value
+        
 
 class Enviroment:
     def __init__(self,enclosing=None):
@@ -33,7 +39,8 @@ class Enviroment:
         self.values = {} # [string] = object
 
     def get(self,name):
-        if self.values.get(name.lex):
+        val = self.values.get(name.lex)
+        if val != None:
             return self.values[name.lex]
         if self.enclosing != None:
             return self.enclosing.get(name)

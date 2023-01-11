@@ -56,7 +56,7 @@ def run(code):
         return had_error, error_list
     
     tree = Parse_Tree()
-    tree.parse_tree_from_prod_list(parser.left_parse)
+    tree.parse_tree_from_prod_list(parser.left_parse,lexer.tokens)
     print(tree)
     ast = AST.ast_from_parse_tree(tree)
     # resolver
@@ -80,11 +80,14 @@ def main(file_path:str=None):
 # if __name__ == "__main__":
 #     main(sys.argv[1])
 
-f = open('F0F/src/code_examples/Basic.txt', 'r')
+f = open('F0F/src/code_examples/Code1.txt', 'r')
 code = f.read()
 f.close()
 G = F0F()
-run(code)
+had_error, error_list = run(code)
+if had_error:
+    for er in error_list:
+        print(er)
 # firsts = First(G)
 # follows = Follow(G, firsts)
 # # print(follows)

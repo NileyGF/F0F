@@ -132,13 +132,13 @@ class Identifier(AtomicNode):
     def visit(self, visitor):
         return visitor.visitIdentifierExpr(self)
 
-class Variable(Node):
-    def __init__(self,type:Type, id:Identifier):
-        super().__init__(id.main_token)
-        self.type = type
-        self.name = id
-    def visit(self, visitor):
-        return visitor.visitVariableExpr(self)
+# class Variable(Node):
+#     def __init__(self,type:Type, id:Identifier):
+#         super().__init__(id.main_token)
+#         self.type = type
+#         self.name = id
+#     def visit(self, visitor):
+#         return visitor.visitVariableExpr(self)
 
 # class Expr(Node):
 #     """ expression -> call = expression
@@ -447,9 +447,9 @@ class VariableDecl(Statement):
         var_value -> = expression ;
         var_value -> ;   
     """
-    def __init__(self, var:Variable, initializer:Node=None):
-        super().__init__(var)
-        self.var = var
+    def __init__(self, id:Identifier, initializer:Node=None):
+        super().__init__(id)
+        self.name = id
         self.initializer = initializer
     def initialized(self):
         return (self.initializer == None)
@@ -458,9 +458,8 @@ class VariableDecl(Statement):
 
 class Function(Statement):
     """ funct_decl -> fun type id ( parameters ) { statement_list } """
-    def __init__(self,type:Type, id:Identifier, parameters_list:list, body:list):
+    def __init__(self, id:Identifier, parameters_list:list, body:list):
         super().__init__(id)
-        self.type = type
         self.name = id
         self.parameters = parameters_list
         self.body = body
@@ -469,7 +468,7 @@ class Function(Statement):
 class Forge(Function):
     """ F0F -> Forge ( parameters ) { statement_list } """
     def __init__(self,forge:Token, parameters_list: list, body: list):
-        super().__init__(POINT(), Identifier(forge), parameters_list, body)
+        super().__init__(Identifier(forge), parameters_list, body)
 
 class While(Statement):
     """ while_statement -> while ( expression ) { statement_list } """
@@ -517,14 +516,19 @@ class Return(Statement):
         self.expression = expression
     def visit(self, visitor):
         return visitor.visitReturnStmt(self)
+class Print(Statement):
+    def __init__(self, expression:Node):
+        super().__init__(expression)
+        self.expression = expression
+    def visit(self, visitor):
+        return visitor.visitPrintStmt(self)
 
 class Program(Node):
     def __init__(self, declarations:list, forge:Forge):
-        super().__init__()
+        super().__init__(Token('',None))
         self.declarations = declarations
         self.forge = forge
-    # def evaluate(self):
-    #     return super().evaluate()
+
     
 # class StatementList(Node):
 #     """

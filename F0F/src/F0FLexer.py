@@ -24,7 +24,7 @@ class F0FLexer:
             self.token_length = 0
             self.scan_Token()
         
-        self.tokens.append(Token('$', TerminalsTokens.EOF, self.line, 0))
+        # self.tokens.append(Token('$', TerminalsTokens.EOF, self.line, 0))
         return self.tokens
     
     def scan_Token(self):

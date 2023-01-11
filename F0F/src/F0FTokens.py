@@ -53,7 +53,8 @@ class TerminalsTokens(TokenType):
     """ end of file"""
     EOF = '$'
     """ types """
-    _type = ['int', 'double', 'void', 'bool', 'string', 'mfun', 'point' ]
+    _type = ['int', 'double', 'void', 'bool', 'string', 'mfun' ]
+    var = 'var'
     # _int = 'int'
     # _double = 'double'
     # _void = 'void'
@@ -186,18 +187,19 @@ keywords_tokens = {
     'for'    : TerminalsTokens.For,
     'if'     : TerminalsTokens.If,
     'else'   : TerminalsTokens.Else,
-    # 'print'  : TerminalsTokens.Print,
+    'print'  : TerminalsTokens.Print,
     'true'   : TerminalsTokens.true,
     'false'  : TerminalsTokens.false,
-    'type'   : TerminalsTokens._type,
-    'void'   : TerminalsTokens._type,
-    'int'    : TerminalsTokens._type,
-    'double' : TerminalsTokens._type,
-    'char'   : TerminalsTokens._type,
-    'bool'   : TerminalsTokens._type,
-    'string' : TerminalsTokens._type,
-    'mfun'   : TerminalsTokens._type,
-    'point'  : TerminalsTokens._type,
+    'var'    : TerminalsTokens.var,
+    # 'type'   : TerminalsTokens._type,
+    # 'void'   : TerminalsTokens._type,
+    # 'int'    : TerminalsTokens._type,
+    # 'double' : TerminalsTokens._type,
+    # 'char'   : TerminalsTokens._type,
+    # 'bool'   : TerminalsTokens._type,
+    # 'string' : TerminalsTokens._type,
+    # 'mfun'   : TerminalsTokens._type,
+    # 'point'  : TerminalsTokens._type,
     'Forge'  : TerminalsTokens.Forge
 }
 

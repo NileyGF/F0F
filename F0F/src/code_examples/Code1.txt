@@ -1,0 +1,11 @@
+// Forge your best weapon to defeat those functions
+
+fun HW ()
+{
+    print("Hello world!");
+}
+HW() ;
+Forge (f, min, max)
+{
+    print("Hi again");
+}

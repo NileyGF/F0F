@@ -104,7 +104,7 @@ class AST():
             if dec_list.children[0].symbol.IsEpsilon:
                 break
             declarations.append(AST._declaration(dec_list.children[0]))
-            dec_list = dec_list[1]
+            dec_list = dec_list.children[1]
         return declarations
     def _declaration(node:PT_node) -> Node:
         # declaration -> funct_decl | var_decl | statement
@@ -112,7 +112,7 @@ class AST():
             return AST._function_dec(node.children[0])
         elif node.children[0].symbol.token_type == NonTerminalsTokens.VarDecl:
             return AST._variable_dec(node.children[0])
-        elif node.children[0].symbol.token_type == NonTerminalsTokens.VarDecl:
+        elif node.children[0].symbol.token_type == NonTerminalsTokens.Statement:
             return AST._statement(node.children[0])
         pass
     def _forge(node:PT_node) -> Forge:
@@ -123,41 +123,41 @@ class AST():
     def _function_dec(node:PT_node) -> Function:
         # funct_decl -> fun type id ( parameters ) { statement_list }
         # Function(type:Type, id:Identifier, parameters_list:list, body:list)
-        ftype = AST._type(node.children[1])
-        id = AST._identifier(node.children[2])
-        parameters_list= AST._parameter_list(node.children[4])
-        body = AST._statement_list(node.children[7])
-        return Function(ftype,id,parameters_list,body)
+        id = AST._identifier(node.children[1])
+        parameters_list= AST._parameter_list(node.children[3])
+        body = AST._statement_list(node.children[6])
+        return Function(id,parameters_list,body)
     def _variable_dec(node:PT_node) -> VariableDecl:
         # var_decl -> type id = expression ; | type id ;  
         # var:Variable, initializer:Node=None 
-        var = AST._variable(node.children[0],node.children[1])
-        if len(node.children) >= 4:
-            init = AST._expression(node.children[3])
+        var = AST._variable(node.children[0])
+        if len(node.children) >= 3:
+            init = AST._expression(node.children[2])
         else: init = None
+        
         return VariableDecl(var,init)
-    def _variable(type_node:PT_node,id_node:PT_node) -> Variable:
-        # type id 
-        vtype = AST._type(type_node)
-        id = AST._identifier(id_node)
-        return Variable(vtype,id)
-    def _type(node:PT_node) -> Type:
+    # def _variable(type_node:PT_node,id_node:PT_node) -> Variable:
+    #     # type id 
+    #     vtype = AST._type(type_node)
+    #     id = AST._identifier(id_node)
+    #     return Variable(vtype,id)
+    # def _type(node:PT_node) -> Type:
         # types_dict = {'int':INT(), 'double':DOUBLE(), 'void':VOID(), 'bool':BOOL(), 
         #          'string':STRING(), 'mfun':MFUN(), 'point':POINT() }
-        if node.symbol.lex == 'int':
-            return INT(node)
-        elif node.symbol.lex == 'double':
-            return DOUBLE(node)
-        elif node.symbol.lex == 'void':
-            return VOID(node)
-        elif node.symbol.lex == 'bool':
-            return BOOL(node)
-        elif node.symbol.lex == 'string':
-            return STRING(node)
-        elif node.symbol.lex == 'mfun':
-            return MFUN(node)
-        elif node.symbol.lex == 'point':
-            return POINT(node)
+        # if node.symbol.lex == 'int':
+        #     return INT(node.symbol)
+        # elif node.symbol.lex == 'double':
+        #     return DOUBLE(node.symbol)
+        # elif node.symbol.lex == 'void':
+        #     return VOID(node.symbol)
+        # elif node.symbol.lex == 'bool':
+        #     return BOOL(node.symbol)
+        # elif node.symbol.lex == 'string':
+        #     return STRING(node.symbol)
+        # elif node.symbol.lex == 'mfun':
+        #     return MFUN(node.symbol)
+        # elif node.symbol.lex == 'point':
+        #     return POINT(node.symbol)
     def _identifier(node:PT_node) -> Identifier:
         return Identifier(node.symbol)
     def _statement_list(node:PT_node) -> list:
@@ -171,35 +171,37 @@ class AST():
                 stmts.append(AST._variable_dec(stmt_list.children[0]))
             elif stmt_list.children[0].symbol.token_type == NonTerminalsTokens.Statement:
                 stmts.append(AST._statement(stmt_list.children[0]))
-            stmt_list = stmt_list[1]
+            stmt_list = stmt_list.children[1]
         return stmts
     def _statement(node:PT_node) -> Node:
-        # statement ->  expression ; | for_stmt | while_stmt | if_stmt | return_stmt 
+        # statement ->  expression ; | for_stmt | while_stmt | if_stmt | return_stmt | print_stmt
         if node.children[0].symbol.token_type == NonTerminalsTokens.Expression:
             return AST._expression(node.children[0])
         elif node.children[0].symbol.token_type == NonTerminalsTokens.ForStmt:
             return AST._for(node.children[0])
         elif node.children[0].symbol.token_type == NonTerminalsTokens.WhileStmt:
             return AST._while(node.children[0])
-        if node.children[0].symbol.token_type == NonTerminalsTokens.IfStmt:
+        elif node.children[0].symbol.token_type == NonTerminalsTokens.IfStmt:
             return AST._if(node.children[0])
         elif node.children[0].symbol.token_type == NonTerminalsTokens.ReturnStmt:
             return AST._return(node.children[0])
+        elif node.children[0].symbol.token_type == NonTerminalsTokens.PrintStmt:
+            return AST._print(node.children[0])
     def _parameter_list(node:PT_node) -> list:
         # parameters -> type id parm | epsilon
         # parm -> , type id parm | epsilon
         parameters = []
         if not node.children[0].symbol.IsEpsilon:
-            ptype = node.children[0]
-            pname = node.children[1]
-            parameters.append(Variable(ptype,pname))
-            parm:PT_node = node.children[2]
+            pname = node.children[0]
+            pname = AST._identifier(pname)
+            parameters.append(pname)
+            parm:PT_node = node.children[1]
         else: return parameters
         while not parm.children[0].symbol.IsEpsilon:
-            ptype = parm.children[1]
-            pname = parm.children[2]
-            parameters.append(Variable(ptype,pname))
-            parm:PT_node = parm.children[3]
+            pname = parm.children[1]
+            pname = AST._identifier(pname)
+            parameters.append(pname)
+            parm:PT_node = parm.children[2]
         return parameters
     def _argument_list(node:PT_node) -> list:
         # arguments -> expression args | epsilon
@@ -250,6 +252,10 @@ class AST():
         else: 
             expr = None
         return Return(expr)
+    def _print(node:PT_node) -> Node:
+        # print_statement -> print ( expression ) ;
+        expr = AST._expression(node.children[2])
+        return Print(expr)
     def _expression(node:PT_node) -> Node:
         # expression -> call = expression
         # expression -> operation
@@ -374,7 +380,7 @@ class AST():
                 # ctype = ctype.children[2]
                 pass
             elif ctype.children[0].symbol.token_type == TerminalsTokens.opar:
-                args = AST._argument_list(node.children[1])
+                args = AST._argument_list(ctype.children[1])
                 prim = ParenCall(prim,args)
                 ctype = ctype.children[3]
         return prim

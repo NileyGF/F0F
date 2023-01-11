@@ -5,12 +5,8 @@ from F0FErrors import SemanticError, RuntimeF0FError
 class Visitor:
     def visitLiteralExpr(expr:Literal):
         pass
-    def visitTypeExpr(expr:Type):
-        pass
     def visitIdentifierExpr(expr:Identifier):
         pass
-    def visitVariableExpr(expr:Variable):
-        pass   
     def visitUnaryExpr(expr:UnaryNode):
         pass 
     def visitBinaryExpr(expr:BinaryNode):
@@ -21,7 +17,7 @@ class Visitor:
         pass
 
 
-    def visitVarDeclStmt(stmt:Variable):
+    def visitVarDeclStmt(stmt:VariableDecl):
         pass    
     def visitFunctionStmt(stmt:Function):
         pass    
@@ -35,6 +31,8 @@ class Visitor:
         pass    
     def visitReturnStmt(stmt:Return):
         pass    
+    def visitPrintStmt(stmt:Print):
+        pass
 
 class Interpreter(Visitor):
     def __init__(self):
@@ -52,8 +50,10 @@ class Interpreter(Visitor):
                 # execute it
                 stmt.visit(self)
             program.forge.visit(self)
-        except:
-            pass
+            forge = self.enviroment.getAt(0,'Forge')
+            forge.call(self,[None,-1000,1000])
+        except Exception as error:
+            print(error)
 
     def evaluate(self,expr:Node):
         return expr.visit(self)
@@ -72,12 +72,12 @@ class Interpreter(Visitor):
         return expr.value
     def visitIdentifierExpr(self,expr:Identifier):
         return expr.name
-    def visitVariableExpr(self,expr:Variable):
-        distance = self.locals.get(expr)
-        if distance is None:
-            return self.globals.get(expr.name)
-        else:
-            return self.enviroment.getAt(distance,expr.name.lex)
+    # def visitVariableExpr(self,expr:Variable):
+    #     distance = self.locals.get(expr)
+    #     if distance is None:
+    #         return self.globals.get(expr.name)
+    #     else:
+    #         return self.enviroment.getAt(distance,expr.name.lex)
     def visitUnaryExpr(self,expr:UnaryNode):
         value = self.evaluate(expr.node)
         if expr is Logic_NOT:
@@ -130,10 +130,14 @@ class Interpreter(Visitor):
         return expr.operate(lvalue,rvalue)
     def visitCallExpr(self,expr:Call):
         caller = self.evaluate(expr.caller)
+        if isinstance(expr.caller,Identifier):
+            caller = self.enviroment.getAt(0,caller)
+        else: print(type(expr.caller))
+        # return caller.call(self,evaluated_args)
         evaluated_args = []
         for arg in expr.arguments:
             evaluated_args.append(self.evaluate(arg))
-        if caller is Callable:
+        if isinstance(caller,Callable):
             caller:Callable
             if len(evaluated_args)!=caller.arity():
                 error = RuntimeF0FError(expr.main_token, "Expected " + caller.arity() + " arguments, but got " + len(evaluated_args) + ".")
@@ -142,7 +146,7 @@ class Interpreter(Visitor):
             else:
                 return caller.call(self,evaluated_args)
         else:
-            error = RuntimeF0FError(expr.main_token,"This object its not callable.")
+            error = RuntimeF0FError(expr.main_token,"This object it\'s not callable.")
             self.had_runtime_error = True
             raise error
 
@@ -160,7 +164,7 @@ class Interpreter(Visitor):
             value = self.evaluate(stmt.initializer)
         self.enviroment.define(stmt.var.name.lex, value)
     def visitFunctionStmt(self,stmt:Function):
-        funct = F0FFunctions(stmt,self.enviroment,False)
+        funct = F0FFunctions(stmt,self.enviroment)
         self.enviroment.define(stmt.name.lex, funct)
     def visitWhileStmt(self,stmt:While):
         cond = self.evaluate(stmt.condition)
@@ -185,3 +189,26 @@ class Interpreter(Visitor):
         if stmt.expression != None:
             value = self.evaluate(stmt.expression)
         raise Return_asExc(value)
+    def visitPrintStmt(self,stmt:Print):
+        value = self.evaluate(stmt.expression)
+        print(value)
+    # def type_checking(self,type:Type,value):
+    #     typestr = type.strtype
+    #     if typestr == 'int':
+    #         if type(value) != int:
+    #             error = RuntimeF0FError(type.main_token,'Invalid value for \'int\' variable.')
+    #             self.had_runtime_error = True
+    #             raise error
+    #     elif typestr == 'double':
+    #         if type(value) != float:
+    #             error = RuntimeF0FError(type.main_token,'Invalid value for \'double\' variable.')
+    #             self.had_runtime_error = True
+    #             raise error
+    #     elif typestr == 'void':
+    #         return VOID(node.symbol)
+    #     elif typestr == 'bool':
+    #         return BOOL(node.symbol)
+    #     elif typestr == 'string':
+    #         return STRING(node.symbol)
+    #     elif typestr == 'mfun':
+    #         return MFUN(node.symbol)

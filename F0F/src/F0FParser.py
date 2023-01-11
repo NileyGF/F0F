@@ -1,5 +1,5 @@
 from F0FTokens import Token,TerminalsTokens
-from F0FGrammar import NonTerminal, Production, Symbol, Grammar, F0F
+from F0FGrammar import Terminal, NonTerminal, Production, Symbol,Epsilon, Grammar, F0F
 from F0FErrors import ParsingError
 from Parser_Generators import First, Follow, LL_1_parsing_table
 import pickle
@@ -34,31 +34,69 @@ class Parse_Tree:
         else: 
             self.initialized = False
 
-    def parse_tree_from_prod_list(self,Prod:list):
-        ind = 0
-        pr: Production = Prod[ind].Head
-        self.root = PT_node(pr)
+    def pt_node_from_Prod(Prod:list,prod_ind:int,tokens:list,tok_ind:int):
+        prod:Production = Prod[prod_ind]
+        head = prod.Head
+        children = []
+        for b in prod.Body:
+            if type(b) is Terminal:
+                if b.token_type == tokens[tok_ind].token_type:
+                    children.append(PT_node(Symbol(token=tokens[tok_ind])))
+                    tok_ind += 1
+                else: 
+                    print('nop')
+                    raise Exception()
+            elif b.IsEpsilon:
+                children.append(PT_node(Epsilon()))
+            else:
+                child, tok_ind,prod_ind = Parse_Tree.pt_node_from_Prod(Prod,prod_ind+1,tokens,tok_ind)
+                children.append(child)
+        return PT_node(head,children), tok_ind, prod_ind 
+
+    def parse_tree_from_prod_list(self,Prod:list,tokens):
+        prod_ind = 0
+        tok_ind = 0
         current_nt = []
-        # current_nt.append(self.root)
-        for b in Prod[ind].Body:
-            child = self.root.add_child(b)
-            if type(b) is NonTerminal:
-                current_nt.append(child)
+        pr: Production = Prod[0]        
+        self.root = Parse_Tree.pt_node_from_Prod(Prod,0,tokens,0) [0]
+        # while prod_ind < len(Prod) and tok_ind < len(tokens):
+        #     head = Prod[prod_ind].Head
+        #     if prod_ind == 0:
+        #         self.root = PT_node(head)
+        #         head_node = self.root
+        #     else:
+        #         head_node = current_nt.pop()
+        #         if head_node.symbol.token_type != head.token_type:
+        #             print('why')
+        #     local_children = []
+
+
+        # pr: Production = Prod[ind].Head
+        # self.root = PT_node(pr)
+        # current_nt = []
+        # # current_nt.append(self.root)
+        # for b in Prod[ind].Body:
+        #     child = self.root.add_child(b)
+        #     if type(b) is NonTerminal:
+        #         current_nt.append(child)
             
-        ind += 1
-        while ind < len(Prod):
-            pr = Prod[ind]
-            for k in range(len(current_nt)):
-                if current_nt[k].symbol == pr.Head:
-                    break
-            # if pr.Head != current_nt[0].symbol:
-            #     print('not working')
-            #     return
-            for b in Prod[ind].Body:
-                child = current_nt[k].add_child(b)
-                current_nt.append(child)
-            current_nt.remove(current_nt[k])
-            ind += 1
+        # ind += 1
+        # while ind < len(Prod):
+        #     pr = Prod[ind]
+        #     for k in range(len(current_nt)):
+        #         if current_nt[k].symbol == pr.Head:
+        #             break
+        #     # if pr.Head != current_nt[0].symbol:
+        #     #     print('not working')
+        #     #     return
+        #     for b in Prod[ind].Body:
+        #         # if type(b) is Terminal:
+
+        #         child = current_nt[k].add_child(b)
+        #         current_nt.append(child)
+        #     current_nt.remove(current_nt[k])
+        #     ind += 1
+
 
     def __repr__(self,node = None , level=0):
         if not node: 
@@ -91,7 +129,7 @@ class F0FParser:
     def synchronize(self,cursor=None):
         if cursor is None: cursor = self.cursor
         cursor += 1
-        synch = [TerminalsTokens.function, TerminalsTokens._type, TerminalsTokens.For, TerminalsTokens.Forge,
+        synch = [TerminalsTokens.function, TerminalsTokens.var, TerminalsTokens.For, TerminalsTokens.Forge,
                 TerminalsTokens.If, TerminalsTokens.While, TerminalsTokens.Return]
         while not self.end_file():
             if self.lexer_tokens[cursor].token_type == TerminalsTokens.semicolon:
@@ -215,22 +253,3 @@ class LL1_Parser(F0FParser):
         self.had_error = True
         self.parser_errors.append(ParsingError(token,msg))
         
-
-# G = F0F() 
-# # firsts = First(G)
-# # follows = Follow(G, firsts)
-# # ll_1_table  = LL_1_parsing_table(G, firsts, follows)
-# # ll1_parser = LL_1_td_parser(G, ll_1_table, firsts, follows)
-
-# source = open('F0F/src/code_examples/1st_test.txt','r')
-# code = source.read()
-# source.close()
-# # code = "// First F0F program \nprint \"Hello World!\" ; \nint x = 56; \nint y = x + 5.7; \nfun void LOL(bool f, string c){ \nwhile(false){} \n	return;\n}\n"
-# lexer = F0FLexer.F0FLexer(code)
-# # print(code)
-# # print()
-# # print(lexer.tokens)
-# tree_list = ll1_parser(lexer.tokens)
-# # tree = Parse_Tree()
-# # tree.parse_tree_from_prod_list(tree_list)
-# # print(tree)
