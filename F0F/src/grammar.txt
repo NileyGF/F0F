@@ -1,4 +1,4 @@
-program -> declaration_list F0F EOF
+program -> declaration_list F0F 
 
 declaration_list -> declaration declaration_list
 declaration_list -> epsilon
@@ -13,9 +13,9 @@ statement_list -> epsilon
 
 F0F -> Forge ( parameters ) { statement_list }
 
-funct_decl -> fun type id ( parameters ) { statement_list }
+funct_decl -> fun id ( parameters ) { statement_list }
 
-var_decl -> type id var_value
+var_decl -> var id var_value
 var_value -> = expression ;
 var_value -> ;   
 
@@ -24,6 +24,7 @@ statement -> for_statement
 statement -> while_statement
 statement -> if_statement
 statement -> return_statement
+statement -> print_statement
 
 for_statement -> for ( var_decl expression ; expression ) { statement_list }
 
@@ -37,9 +38,11 @@ return_statement -> return ret
 ret -> expression ;
 ret -> ;
 
-parameters -> type id parm
+print_statement -> print ( expression ) ;
+
+parameters -> id parm
 parameters -> epsilon
-parm -> , type id parm
+parm -> , id parm
 parm -> epsilon
 
 arguments -> expression args
@@ -47,7 +50,7 @@ arguments -> epsilon
 args -> , expression args
 args -> epsilon
 
-expression -> call = expression
+expression -> call = operation
 expression -> operation
 
 operation -> logic_and OR
@@ -91,8 +94,6 @@ unary -> call
 
 call -> primary call_type 
 
-call_type -> . id call_type
-call_type -> [ expression ] call_type
 call_type -> ( arguments ) call_type
 call_type -> epsilon
 

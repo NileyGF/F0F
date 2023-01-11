@@ -166,15 +166,15 @@ class Interpreter(Visitor):
         self.globals.define('clock',globals_clock())
 
     def interpret(self, program:Program):
-        # try:
+        try:
             for stmt in program.declarations:
                 # execute it
                 stmt.visit(self)
             program.forge.visit(self)
             forge = self.enviroment.getAt(0,'Forge')
             forge.call(self,[None,-1000,1000])
-        # except Exception as error:
-        #     print(error)
+        except Exception as error:
+            print(error)
 
     def evaluate(self,expr:Node):
         return expr.visit(self)
