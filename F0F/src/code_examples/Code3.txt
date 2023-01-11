@@ -8,7 +8,9 @@ fun test(a,b)
     if (b < 0) {
         b = b ^ 2 ;
     } 
-    print("a - b : ");
+    print("a, b, a - b : ");
+    print(a);
+    print(b);
     print(a-b);
     return (a - b) % 2 ;
 }
@@ -17,11 +19,35 @@ var odd = "a - b is odd";
 
 Forge (f, min, max)
 {
-    print(test(-2,2));
+    var bin = test(-2,2);
+    if (bin == 0){
+        print(even);
+    }
+    else {
+        print(odd);
+    }
 
-    print(test(7,6));
+    bin = test(7,6);
+    if (bin == 0){
+        print(even);
+    }
+    else {
+        print(odd);
+    }
 
-    print(test(11,-13));
+    bin = test(11,-13);
+    if (bin == 0){
+        print(even);
+    }
+    else {
+        print(odd);
+    }
 
-    print(test(0,1));
+    bin = test(0,1);
+    if (bin == 0){
+        print(even);
+    }
+    else {
+        print(odd);
+    }
 }
