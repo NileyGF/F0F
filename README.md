@@ -16,108 +16,87 @@ Where <file_path> is the path to the file with the code to execute in our Domain
 ## Grammar:
     program -> declaration_list F0F 
 
-    declaration_list -> declaration declaration_list
-    declaration_list -> epsilon
+    declaration_list -> declaration declaration_list | epsilon
 
-    declaration -> funct_decl
-    declaration -> var_decl
-    declaration -> statement
+    declaration -> funct_decl | var_dec | statement
 
-    statement_list -> var_decl statement_list
-    statement_list -> statement statement_list
-    statement_list -> epsilon
+    statement_list -> var_decl statement_list | statement statement_list | epsilon
 
     F0F -> Forge ( parameters ) { statement_list }
 
     funct_decl -> fun id ( parameters ) { statement_list }
 
     var_decl -> var id var_value
-    var_value -> = expression ;
-    var_value -> ;   
+    var_value -> = expression ; | ;   
 
-    statement -> expression ;
-    statement -> for_statement
-    statement -> while_statement
-    statement -> if_statement
-    statement -> return_statement
-    statement -> print_statement
+    statement -> expression ; | for_statement | while_statement | if_statement | return_statement | print_statement
 
     for_statement -> for ( var_decl expression ; expression ) { statement_list }
 
     while_statement -> while ( expression ) { statement_list }
 
     if_statement -> if ( expression ) { statement_list } else_stmt
-    else_stmt -> else { statement_list }
-    else_stmt -> epsilon
+    else_stmt -> else { statement_list } | epsilon
 
     return_statement -> return ret
-    ret -> expression ;
-    ret -> ;
+    ret -> expression ; | ;
 
     print_statement -> print ( expression ) ;
 
-    parameters -> id parm
-    parameters -> epsilon
-    parm -> , id parm
-    parm -> epsilon
+    parameters -> id parm | epsilon
+    parm -> , id parm | epsilon
 
-    arguments -> expression args
-    arguments -> epsilon
-    args -> , expression args
-    args -> epsilon
+    arguments -> expression args | epsilon
+    args -> , expression args | epsilon
 
-    expression -> call = operation
-    expression -> operation
+    expression -> call = operation | operation
 
     operation -> logic_and OR
-    OR -> || operation
-    OR -> epsilon
+    OR -> || operation | epsilon
 
     logic_and -> equality AND
-    AND -> && logic_and
-    AND -> epsilon
+    AND -> && logic_and | epsilon
 
     equality -> comparison eql
-    eql -> == equality
-    eql -> != equality
-    eql -> epsilon
+    eql -> == equality | != equality | epsilon
 
     comparison -> term LGEq
-    LGEq -> < comparison
-    LGEq -> <= comparison
-    LGEq -> > comparison
-    LGEq -> >= comparison
-    LGEq -> epsilon
+    LGEq -> < comparison | <= comparison | > comparison  | >= comparison | epsilon
 
     term -> factor FX
-    FX -> + term
-    FX -> - term
-    FX -> epsilon
+    FX -> + term | - term | epsilon
 
     factor -> pow PowX
-    PowX -> * factor
-    PowX -> / factor
-    PowX -> % factor
-    PowX -> epsilon
+    PowX -> * factor | / factor | % factor | epsilon
 
     pow -> unary UX
-    UX -> ^ pow
-    UX -> epsilon
+    UX -> ^ pow | epsilon
 
-    unary -> ! unary
-    unary -> - unary
-    unary -> call
+    unary -> ! unary | - unary | call
 
     call -> primary call_type 
 
-    call_type -> ( arguments ) call_type
-    call_type -> epsilon
+    call_type -> ( arguments ) call_type | epsilon
 
-    primary -> true 
-    primary -> false
-    primary -> null
-    primary -> integer 
-    primary -> decimal
-    primary -> string_chain 
-    primary -> id
-    primary -> ( expression )
+    primary -> true  | false | null | integer  | decimal | string_chain  | id | ( expression )
+
+It is a context free grammar. It is not LL(1) because the productions of 'expression' have intersections in the firsts, since they both reach 'call'. 
+We parse this grammar with a modified LL(1) predictive parser, even though the grammar itself isn't LL(1). We acomplish that doing a branching in the conflictive cases. That allows us to check wich production is the appropriate for the token.
+
+## Compiler architecture:
+    lexer = F0FLexer.F0FLexer(code)
+    parser = LL1_Parser(G)
+    parser.begin(lexer.tokens)
+    tree = Parse_Tree()
+    tree.parse_tree_from_prod_list(parser.left_parse,lexer.tokens)
+    ast = AST.ast_from_parse_tree(tree)
+    interpreter = Interpreter()
+    # resolver
+    resolver = Resolver(interpreter)
+    resolver.begin(ast)
+    # interpret
+    interpreter.interpret(ast.root)
+    
+The compiler for F0F implements a lexer(scanner) that creates the code tokens in a lineal time according to the source code size. Later the parser checks for errors and return a productions list. From wich is created a Parse Tree. Later it is used to build the Abstract Syntax Tree (AST), discarding semantic information as grouping symbols, and epsilon.
+The compiler implements a Visitor pattern, used for resolving scopes and variables values and interpreting. The language have dynamic typing, but the type check could be effectuated using a visitor. 
+
