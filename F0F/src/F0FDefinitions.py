@@ -47,7 +47,8 @@ class Enviroment:
         raise RuntimeF0FError(name,"Undefined variable '" + name.lex + "'.")
     
     def assign(self,name,value):
-        if self.values.get(name.lex):
+        val = self.values.get(name.lex)
+        if val != None:
             self.values[name.lex] = value
             return
         if self.enclosing != None:
@@ -68,4 +69,4 @@ class Enviroment:
         return self.ancestor(distance).values.get(name)
     
     def assignAt(self,distance:int,name,value):
-        self.ancestor(distance).values.put(name.lex, value)
+        self.ancestor(distance).values[name.lex] = value

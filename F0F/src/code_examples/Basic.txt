@@ -2,7 +2,8 @@
 
 
 
-Forge (mfun f, double min, double max)
+Forge ( f, min, max)
 {
-	
+	print("Welcome to our DSL Forge Zero Finders!") ;
+    print("The language details are in https://github.com/NileyGF/F0F.git.") ;
 }

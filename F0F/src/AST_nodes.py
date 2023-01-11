@@ -10,9 +10,10 @@ class Node:
 
     def visit(self,visitor):
         raise NotImplementedError()
-
-    # def evaluate(self):
-    #     raise NotImplementedError()
+    def __str__(self) -> str:
+        return self.main_token.__str__()
+    def __repr__(self):
+        return self.__str__()
 
 class AtomicNode(Node):
     def __init__(self,token:Token):
@@ -23,9 +24,6 @@ class UnaryNode(Node):
         super().__init__(node.main_token)
         self.node = node
 
-    # def evaluate(self):
-    #     value = self.node.evaluate()
-    #     return self.operate(value)
     def visit(self, visitor):
         return visitor.visitUnaryExpr(self)
 
@@ -38,10 +36,6 @@ class BinaryNode(Node):
         self.left = left
         self.right = right
 
-    # def evaluate(self):
-    #     lvalue = self.left.evaluate()
-    #     rvalue = self.right.evaluate()
-    #     return self.operate(lvalue, rvalue)
     def visit(self, visitor):
         return visitor.visitBinaryExpr(self)
 
@@ -50,8 +44,6 @@ class BinaryNode(Node):
         raise NotImplementedError()
 
 class Literal(AtomicNode):
-    # def evaluate(self):
-    #     return self.value
     def visit(self, visitor):
         return visitor.visitLiteralExpr(self)
 class NULL(Literal):
@@ -102,66 +94,33 @@ class String_chain(Literal):
             print(error)
             self.semantic_errors.append(error)
 
-class Type(Node):
-    def __init__(self,token:Token):
-        super().__init__(token)
-        self.strtype = token.lex
-    def visit(self, visitor):
-        return visitor.visitTypeExpr(self)
-class INT(Type):
-    pass
-class DOUBLE(Type):
-    pass
-class VOID(Type):
-    pass
-class BOOL(Type):
-    pass
-class STRING(Type):
-    pass
-class MFUN(Type):
-    pass
-class POINT(Type):
-    pass
+# class Type(Node):
+#     def __init__(self,token:Token):
+#         super().__init__(token)
+#         self.strtype = token.lex
+#     def visit(self, visitor):
+#         return visitor.visitTypeExpr(self)
+# class INT(Type):
+#     pass
+# class DOUBLE(Type):
+#     pass
+# class VOID(Type):
+#     pass
+# class BOOL(Type):
+#     pass
+# class STRING(Type):
+#     pass
+# class MFUN(Type):
+#     pass
+# class POINT(Type):
+#     pass
 
 class Identifier(AtomicNode):
     def __init__(self, token:Token):
         super().__init__(token)
         self.name=token.lex
-    # def evaluate(self):
-    #     return self.name
     def visit(self, visitor):
         return visitor.visitIdentifierExpr(self)
-
-# class Variable(Node):
-#     def __init__(self,type:Type, id:Identifier):
-#         super().__init__(id.main_token)
-#         self.type = type
-#         self.name = id
-#     def visit(self, visitor):
-#         return visitor.visitVariableExpr(self)
-
-# class Expr(Node):
-#     """ expression -> call = expression
-#         expression -> operation
-#     """    
-#     pass
-
-# class Argument(Expr):
-#     def __init__(self,expression:Expr):
-#             self.expression = expression
-#     def accept(self,visitor: Visitor):
-#         return visitor.visitUnaryExpr(self)
-#     def evaluate(self):
-#         return self.expression.evaluate()
-
-# class Parameter(Node):
-#     def __init__(self,var:Variable):
-#             self.variable = var
-#     def accept(self,visitor: Visitor):
-#         return visitor.visitVariableExpr(self)
-#     def evaluate(self):
-#         return self.variable.evaluate()
-
 
 
 class Logic_NOT(UnaryNode):
@@ -260,18 +219,6 @@ class Pow(BinaryNode):
     def __init__(self, left: Node, right: Node):
         super().__init__(left, right)
 
-    # def evaluate(self):
-    #     lvalue = self.left.evaluate()
-    #     rvalue = self.right.evaluate()
-    #     try:
-    #         lvalue = float(lvalue)
-    #         rvalue = float(rvalue)
-    #         return self.operate(lvalue, rvalue)
-    #     except:
-    #         error = SemanticError('Power(^) operands must be numbers..')
-    #         print(error)
-    #         self.semantic_errors.append(error) 
-
     @staticmethod
     def operate(lvalue, rvalue):
         return lvalue ** rvalue
@@ -280,30 +227,10 @@ class Term(BinaryNode):
     def __init__(self, left: Node, right: Node):
         super().__init__(left, right)
 class Sum(Term):
-    # def evaluate(self):
-    #     lvalue = self.left.evaluate()
-    #     rvalue = self.right.evaluate()
-    #     try:
-    #         return self.operate(lvalue, rvalue)
-    #     except:
-    #         error = SemanticError('Invalid sum operation.')
-    #         print(error)
-    #         self.semantic_errors.append(error) 
     @staticmethod
     def operate(lvalue, rvalue):
         return lvalue + rvalue
 class Minus(Term):
-    # def evaluate(self):
-    #     lvalue = self.left.evaluate()
-    #     rvalue = self.right.evaluate()
-    #     try:
-    #         lvalue = float(lvalue)
-    #         rvalue = float(rvalue)
-    #         return self.operate(lvalue, rvalue)
-    #     except:
-    #         error = SemanticError('Substraction operands must be numbers.')
-    #         print(error)
-    #         self.semantic_errors.append(error) 
     @staticmethod
     def operate(lvalue, rvalue):
         return lvalue - rvalue
@@ -311,17 +238,6 @@ class Minus(Term):
 class Comparison(BinaryNode):
     def __init__(self, left: Node, right: Node):
         super().__init__(left, right)
-    # def evaluate(self):
-    #     lvalue = self.left.evaluate()
-    #     rvalue = self.right.evaluate()
-    #     try:
-    #         lvalue = float(lvalue)
-    #         rvalue = float(rvalue)
-    #         return self.operate(lvalue, rvalue)
-    #     except:
-    #         error = SemanticError('Comparison operands must be numbers.')
-    #         print(error)
-    #         self.semantic_errors.append(error) 
 class Less(Comparison):
     @staticmethod
     def operate(lvalue, rvalue):
@@ -355,17 +271,6 @@ class Logic_OR(BinaryNode):
     def __init__(self, left: Node, right: Node):
         super().__init__(left, right)
 
-    # def evaluate(self):
-    #     lvalue = self.left.evaluate()
-    #     rvalue = self.right.evaluate()
-    #     try:
-    #         lvalue = Bool(lvalue)
-    #         rvalue = Bool(rvalue)
-    #         return self.operate(lvalue, rvalue)
-    #     except:
-    #         error = SemanticError('Invalid || operation')
-    #         print(error)
-    #         self.semantic_errors.append(error)
     @staticmethod
     def operate(lvalue, rvalue):
         return lvalue or rvalue
@@ -434,12 +339,6 @@ class Statement(Node):
     """
     def __init__(self, node:Node):
         super().__init__(node.main_token)
-# class ExpressionStmt(Statement):
-#     """ statement -> expression ; """
-#     def __init__(self,expression:Expr):
-#         self.expression = expression
-#     def accept(self, visitor: Visitor):
-#         return visitor.visitExpressionStmt
 
 class VariableDecl(Statement):
     """
@@ -452,7 +351,7 @@ class VariableDecl(Statement):
         self.name = id
         self.initializer = initializer
     def initialized(self):
-        return (self.initializer == None)
+        return (self.initializer != None)
     def visit(self, visitor):
         return visitor.visitVarDeclStmt(self)
 
@@ -529,14 +428,5 @@ class Program(Node):
         self.declarations = declarations
         self.forge = forge
 
-    
-# class StatementList(Node):
-#     """
-#         statement_list -> var_decl statement_list
-#         statement_list -> statement statement_list
-#         statement_list -> epsilon
-#     """
-#     def __init__(self,list:list):
-#         self.list = list
-
+ 
 

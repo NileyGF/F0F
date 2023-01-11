@@ -660,7 +660,7 @@ class F0F(Grammar):
             Production(nonTerminals[7], Sentential_Form(terminals[41],terminals[4], nonTerminals[13],terminals[5], terminals[10],nonTerminals[6], terminals[11])),
             # funct_decl -> fun type id ( parameters ) { statement_list }
             Production(nonTerminals[3], Sentential_Form(terminals[32],terminals[40],terminals[4], nonTerminals[13],terminals[5], terminals[10],nonTerminals[6], terminals[11])),
-            # var_decl -> type id var_value
+            # var_decl -> var id var_value
             # var_value -> = expression ;
             # var_value -> ;   
             Production(nonTerminals[4], Sentential_Form(terminals[34],terminals[40],nonTerminals[19])),
@@ -712,7 +712,7 @@ class F0F(Grammar):
             Production(nonTerminals[15],self.Epsilon),
             Production(nonTerminals[16],Sentential_Form(terminals[6], nonTerminals[12],nonTerminals[16])),
             Production(nonTerminals[16],self.Epsilon),
-            # expression -> call = expression
+            # expression -> call = operation
             # expression -> operation
             Production(nonTerminals[12],Sentential_Form(nonTerminals[20],terminals[17],nonTerminals[21])),
             Production(nonTerminals[12],Sentential_Form(nonTerminals[21])),
@@ -784,7 +784,7 @@ class F0F(Grammar):
             # call_type -> [ expression ] call_type
             # call_type -> ( arguments ) call_type
             # call_type -> epsilon
-            Production(nonTerminals[37],Sentential_Form(terminals[7], terminals[40],nonTerminals[37])),
+            # Production(nonTerminals[37],Sentential_Form(terminals[7], terminals[40],nonTerminals[37])),
             # Production(nonTerminals[37],Sentential_Form(terminals[8], nonTerminals[12],terminals[9], nonTerminals[37])),
             Production(nonTerminals[37],Sentential_Form(terminals[4], nonTerminals[15],terminals[5], nonTerminals[37])),
             Production(nonTerminals[37],self.Epsilon),

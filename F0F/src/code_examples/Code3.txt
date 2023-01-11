@@ -1,0 +1,27 @@
+// Forge your best weapon to defeat those functions
+
+fun test(a,b)
+{
+    if (a < 0) {
+        a = a ^ 2 ;
+    }
+    if (b < 0) {
+        b = b ^ 2 ;
+    } 
+    print("a - b : ");
+    print(a-b);
+    return (a - b) % 2 ;
+}
+var even = "a - b is even";
+var odd = "a - b is odd";
+
+Forge (f, min, max)
+{
+    print(test(-2,2));
+
+    print(test(7,6));
+
+    print(test(11,-13));
+
+    print(test(0,1));
+}

@@ -35,7 +35,8 @@ class F0FLexer:
             self.token_length = 0        
         elif c == '(' or c == ')' or c == '[' or c == ']' \
             or c == '{' or c == '}' or c == ',' or c == '.'\
-            or c == '-' or c == '+' or c == '*' or c == '^' or c == ';':
+            or c == '-' or c == '+' or c == '*' or c == '^'\
+            or c == ';' or c =='%':
 
             self.token_length += 1
             self.add_Token(symbols_tokens[c])

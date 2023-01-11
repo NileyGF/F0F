@@ -128,11 +128,12 @@ class AST():
         body = AST._statement_list(node.children[6])
         return Function(id,parameters_list,body)
     def _variable_dec(node:PT_node) -> VariableDecl:
-        # var_decl -> type id = expression ; | type id ;  
-        # var:Variable, initializer:Node=None 
-        var = AST._variable(node.children[0])
-        if len(node.children) >= 3:
-            init = AST._expression(node.children[2])
+        # var_decl -> var id var_value
+        # var_value -> = expression ; | ;   
+        var = AST._identifier(node.children[1])
+        value = node.children[2]
+        if len(value.children) >= 3:
+            init = AST._expression(value.children[1])
         else: init = None
         
         return VariableDecl(var,init)
@@ -213,9 +214,9 @@ class AST():
             args:PT_node = node.children[1]
         else: return arguments
         while not args.children[0].symbol.IsEpsilon:
-            expr = AST._expression(node.children[1])
+            expr = AST._expression(args.children[1])
             arguments.append(expr)
-            args:PT_node = node.children[2]
+            args:PT_node = args.children[2]
         return arguments
     def _for(node:PT_node) -> For:
         # for_statement -> for ( var_decl expression ; expression ) { statement_list }
@@ -246,9 +247,11 @@ class AST():
         body = AST._statement_list(node.children[2])
         return Else(body)
     def _return(node:PT_node) -> Node:
-        # return_statement -> return expression ; | return ;
-        if len(node.children) > 2:
-            expr = AST._expression(node.children[1])
+        # return_statement -> return ret
+        # ret -> expression ; | ;
+        ret = node.children[1]
+        if len(ret.children) > 1:
+            expr = AST._expression(ret.children[0])
         else: 
             expr = None
         return Return(expr)
@@ -257,14 +260,14 @@ class AST():
         expr = AST._expression(node.children[2])
         return Print(expr)
     def _expression(node:PT_node) -> Node:
-        # expression -> call = expression
+        # expression -> call = operation
         # expression -> operation
         if len(node.children) == 1:
             return AST._or(node.children[0])
         else:
             # Assignment(call:Call, expression:Node)
             call = AST._call(node.children[0])
-            value = AST._expression(node.children[2])
+            value = AST._or(node.children[2])
             return Assignment(call, value)
     def _or(node:PT_node) -> Node:
         # operation -> logic_and OR

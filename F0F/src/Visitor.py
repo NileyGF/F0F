@@ -3,36 +3,157 @@ from F0FDefinitions import *
 from F0FErrors import SemanticError, RuntimeF0FError
 
 class Visitor:
-    def visitLiteralExpr(expr:Literal):
+    def visitLiteralExpr(self,expr:Literal):
         pass
-    def visitIdentifierExpr(expr:Identifier):
+    def visitIdentifierExpr(self,expr:Identifier):
         pass
-    def visitUnaryExpr(expr:UnaryNode):
+    def visitUnaryExpr(self,expr:UnaryNode):
         pass 
-    def visitBinaryExpr(expr:BinaryNode):
+    def visitBinaryExpr(self,expr:BinaryNode):
         pass
-    def visitCallExpr(expr:Call):
+    def visitCallExpr(self,expr:Call):
         pass    
-    def visitAssignExpr(expr:Assignment):
+    def visitAssignExpr(self,expr:Assignment):
         pass
 
 
-    def visitVarDeclStmt(stmt:VariableDecl):
+    def visitVarDeclStmt(self,stmt:VariableDecl):
         pass    
-    def visitFunctionStmt(stmt:Function):
+    def visitFunctionStmt(self,stmt:Function):
         pass    
-    def visitWhileStmt(stmt:While):
+    def visitWhileStmt(self,stmt:While):
         pass   
-    def visitForStmt(stmt:For):
+    def visitForStmt(self,stmt:For):
         pass     
-    def visitStmtList(stmt:list):
+    def visitStmtList(self,stmt:list):
         pass     
-    def visitIfStmt(stmt:If):
+    def visitIfStmt(self,stmt:If):
         pass    
-    def visitReturnStmt(stmt:Return):
+    def visitReturnStmt(self,stmt:Return):
         pass    
-    def visitPrintStmt(stmt:Print):
+    def visitPrintStmt(self,stmt:Print):
         pass
+
+class Resolver(Visitor):
+    def __init__(self,interpreter):
+        self.interpreter:Interpreter = interpreter
+        self.scopes = []
+        self.current_function = None
+    
+    def begin(self,ast):
+        program = ast.root
+        self.begin_scope()
+        for stmt in program.declarations:
+                # execute it
+                self.resolve(stmt)
+        self.resolve(program.forge)
+        self.end_scope()
+
+    def resolve(self,node):
+        node.visit(self)
+    
+    def begin_scope(self):
+        self.scopes.append(dict())
+    def end_scope(self):
+        self.scopes.pop()
+    def declare(self,name:Token):
+        if len(self.scopes) == 0:
+            return
+        scope = self.scopes[len(self.scopes)-1]
+        value = scope.get(name.lex)
+        if value != None:
+            raise RuntimeF0FError(name, "Variable with this name already declared in this scope.")
+        scope[name.lex] = False
+    def define(self,name:Token):
+        if len(self.scopes) == 0:
+            return
+        scope = self.scopes[len(self.scopes)-1]
+        scope[name.lex] = True
+    def resolve_local(self,expr,name:Token):
+        for i in range(len(self.scopes)-1,-1,-1):
+            scope = self.scopes[i]
+            val = scope.get(name.lex)
+            if val != None:
+                self.interpreter.resolve(expr,len(self.scopes)-1-i)
+                return
+
+    def visitLiteralExpr(self,expr:Literal):
+        return None
+    def visitIdentifierExpr(self,expr:Identifier):
+        self.resolve_local(expr,expr.main_token)
+    def visitUnaryExpr(self,expr:UnaryNode):
+        for i in range(len(self.scopes)-1,-1,-1):            
+            node_solved = self.scopes[i].get(expr.node.main_token.lex)
+            if node_solved != None:
+                break
+        if node_solved == None:
+            self.resolve(expr.node)
+    def visitBinaryExpr(self,expr:BinaryNode):
+        for i in range(len(self.scopes)-1,-1,-1):
+            left_solved = self.scopes[i].get(expr.left.main_token.lex)
+            if left_solved != None:
+                break
+        for i in range(len(self.scopes)-1,-1,-1):            
+            right_solved = self.scopes[i].get(expr.right.main_token.lex)
+            if right_solved != None:
+                break
+        if left_solved == None:
+            self.resolve(expr.left)
+        if right_solved == None:
+            self.resolve(expr.right)
+    def visitCallExpr(self,expr:ParenCall):
+        for i in range(len(self.scopes)-1,-1,-1):
+            caller_solved = self.scopes[i].get(expr.caller.main_token.lex)
+            if caller_solved != None:
+                break
+        if caller_solved == None:
+            self.resolve(expr.caller)
+        for arg in expr.arguments:
+            self.resolve(arg)
+    def visitAssignExpr(self,expr:Assignment):
+        self.resolve(expr.right)
+        self.resolve_local(expr, expr.left.main_token)
+
+
+    def visitVarDeclStmt(self,stmt:VariableDecl):
+        self.declare(stmt.name.main_token)
+        if stmt.initializer != None:
+            self.resolve(stmt.initializer)
+        self.define(stmt.name.main_token)
+    def visitFunctionStmt(self,stmt:Function):
+        enclosing_function = self.current_function
+        self.current_function = 'function'
+        self.declare(stmt.name.main_token)
+        self.define(stmt.name.main_token)
+
+        self.begin_scope()
+        for p in stmt.parameters:
+            self.declare(p.main_token)
+            self.define(p.main_token)
+        self.visitStmtList(stmt.body)
+        self.end_scope()
+        self.current_function = enclosing_function
+    def visitWhileStmt(self,stmt:While):
+        self.resolve(stmt.condition)
+        self.visitStmtList(stmt.body)
+    def visitForStmt(self,stmt:For):
+        self.resolve(stmt.initializer)
+        self.resolve(stmt.loop)
+    def visitStmtList(self,stmt:list):
+        for s in stmt:
+            self.resolve(s)
+    def visitIfStmt(self,stmt:If):
+        self.resolve(stmt.condition)
+        self.visitStmtList(stmt.body)
+        if stmt.else_branch != None:
+            self.visitStmtList(stmt.else_branch.body)
+    def visitReturnStmt(self,stmt:Return):
+        if self.current_function == None:
+            raise RuntimeF0FError(stmt.main_token,"Cannot return from top-level code.")
+        if stmt.expression != None:
+            self.resolve(stmt.expression)
+    def visitPrintStmt(self,stmt:Print):
+        self.resolve(stmt.expression)
 
 class Interpreter(Visitor):
     def __init__(self):
@@ -45,15 +166,15 @@ class Interpreter(Visitor):
         self.globals.define('clock',globals_clock())
 
     def interpret(self, program:Program):
-        try:
+        # try:
             for stmt in program.declarations:
                 # execute it
                 stmt.visit(self)
             program.forge.visit(self)
             forge = self.enviroment.getAt(0,'Forge')
             forge.call(self,[None,-1000,1000])
-        except Exception as error:
-            print(error)
+        # except Exception as error:
+        #     print(error)
 
     def evaluate(self,expr:Node):
         return expr.visit(self)
@@ -66,18 +187,19 @@ class Interpreter(Visitor):
                 stmt.visit(self)
         finally:
             self.enviroment = previous
-
+    def resolve(self,expr:Node,depth:int):
+        self.locals[expr] = depth
 
     def visitLiteralExpr(self,expr:Literal):
         return expr.value
     def visitIdentifierExpr(self,expr:Identifier):
-        return expr.name
-    # def visitVariableExpr(self,expr:Variable):
-    #     distance = self.locals.get(expr)
-    #     if distance is None:
-    #         return self.globals.get(expr.name)
-    #     else:
-    #         return self.enviroment.getAt(distance,expr.name.lex)
+        # distance = self.locals.get(expr)
+        try:
+            return self.enviroment.get(expr.main_token)
+        except:
+            return self.globals.get(expr.main_token)
+        
+        # return expr.name
     def visitUnaryExpr(self,expr:UnaryNode):
         value = self.evaluate(expr.node)
         if expr is Logic_NOT:
@@ -131,7 +253,7 @@ class Interpreter(Visitor):
     def visitCallExpr(self,expr:Call):
         caller = self.evaluate(expr.caller)
         if isinstance(expr.caller,Identifier):
-            caller = self.enviroment.getAt(0,caller)
+            caller = self.enviroment.get(expr.caller.main_token)
         else: print(type(expr.caller))
         # return caller.call(self,evaluated_args)
         evaluated_args = []
@@ -154,15 +276,16 @@ class Interpreter(Visitor):
         value = self.evaluate(expr.right)
         distance = self.locals.get(expr)
         if distance is None:
-            self.globals.assign(expr.left,value)
+            self.globals.assign(expr.left.main_token,value)
         else:
-            self.enviroment.assignAt(distance,expr.left,value)
+            self.enviroment.assign(expr.left.main_token,value)
         return value
 
     def visitVarDeclStmt(self,stmt:VariableDecl):
+        value = None
         if stmt.initialized():
             value = self.evaluate(stmt.initializer)
-        self.enviroment.define(stmt.var.name.lex, value)
+        self.enviroment.define(stmt.name.lex, value)
     def visitFunctionStmt(self,stmt:Function):
         funct = F0FFunctions(stmt,self.enviroment)
         self.enviroment.define(stmt.name.lex, funct)
@@ -184,6 +307,8 @@ class Interpreter(Visitor):
         if cond:
             self.visitStmtList(stmt.body)
         else:
+            if stmt.else_branch == None:
+                return
             stmt.else_branch.visit(self)
     def visitReturnStmt(self,stmt:Return):
         if stmt.expression != None:
@@ -191,24 +316,9 @@ class Interpreter(Visitor):
         raise Return_asExc(value)
     def visitPrintStmt(self,stmt:Print):
         value = self.evaluate(stmt.expression)
-        print(value)
-    # def type_checking(self,type:Type,value):
-    #     typestr = type.strtype
-    #     if typestr == 'int':
-    #         if type(value) != int:
-    #             error = RuntimeF0FError(type.main_token,'Invalid value for \'int\' variable.')
-    #             self.had_runtime_error = True
-    #             raise error
-    #     elif typestr == 'double':
-    #         if type(value) != float:
-    #             error = RuntimeF0FError(type.main_token,'Invalid value for \'double\' variable.')
-    #             self.had_runtime_error = True
-    #             raise error
-    #     elif typestr == 'void':
-    #         return VOID(node.symbol)
-    #     elif typestr == 'bool':
-    #         return BOOL(node.symbol)
-    #     elif typestr == 'string':
-    #         return STRING(node.symbol)
-    #     elif typestr == 'mfun':
-    #         return MFUN(node.symbol)
+        strn = str(value)
+        if isinstance(value,float):
+            if strn.endswith('.0'):
+                strn = strn[:len(strn)-2]
+        print(strn)
+

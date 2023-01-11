@@ -1,8 +1,21 @@
 // Forge your best weapon to defeat those functions
 
-
-
-Forge (mfun f, double min, double max)
+fun getmin(a,b)
 {
-	
+    if (a <= b)
+    {
+        return a;
+    }
+    else{
+        return b;
+    }
+    return 100000;
+}
+var a = "out of the forge";
+print(a);
+
+Forge (f, min, max)
+{
+    var m = getmin(min,max) ;
+	print(m);
 }
